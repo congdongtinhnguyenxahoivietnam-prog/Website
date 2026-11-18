@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cộng đồng Tình nguyện Xã hội Việt Nam | 17 Mục tiêu Phát triển Bền vững (SDGs)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'un-blue': '#009EDB',
+                        'un-dark': '#007BB8',
+                        'un-deep': '#0A4D68',
+                        'un-light': '#E6F4FA',
+                        'un-tint': '#F0F9FF'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-un-blue selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2.5 pointer-events-none"></div>
+
+    <!-- =====================================================================
+         1. HEADER & NAVIGATION
+    ====================================================================== -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20 gap-3">
+                
+                <!-- Logo & Brand Name -->
+                <div class="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+                    <div class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-un-blue to-un-deep flex items-center justify-center text-white shadow-md shadow-un-blue/30 overflow-hidden shrink-0">
+                        <img id="site-logo-img" src="" alt="Logo VSVC" class="w-full h-full object-cover hidden">
+                        <i id="site-logo-default" data-lucide="globe-2" class="w-6 h-6"></i>
+                        
+                        <!-- Admin Logo Upload Trigger -->
+                        <label id="admin-logo-upload-btn" for="logo-file-input" title="Tải ảnh Logo mới (Chỉ Admin)" class="hidden absolute inset-0 bg-slate-900/75 hover:bg-slate-900/90 text-white flex flex-col items-center justify-center cursor-pointer transition">
+                            <i data-lucide="camera" class="w-4 h-4 text-sky-400"></i>
+                            <span class="text-[8px] font-bold uppercase mt-0.5">Đổi Logo</span>
+                        </label>
+                        <input type="file" id="logo-file-input" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+                    </div>
+                    <a href="#trang-chu" class="block">
+                        <span class="block font-display font-extrabold text-slate-900 text-[11px] sm:text-xs xl:text-sm uppercase whitespace-nowrap tracking-tight leading-tight group-hover:text-un-blue transition">
+                            CỘNG ĐỒNG TÌNH NGUYỆN XÃ HỘI VIỆT NAM
+                        </span>
+                        <span class="block text-[10px] sm:text-[11px] text-un-blue font-bold tracking-wider uppercase whitespace-nowrap">
+                            Vietnam Social Volunteer Community • SDGs
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Desktop Nav Links -->
+                <nav class="hidden lg:flex items-center gap-6">
+                    <a href="#trang-chu" class="text-sm font-semibold text-slate-700 hover:text-un-blue transition">Trang chủ</a>
+                    <a href="#ve-chung-toi" class="text-sm font-semibold text-slate-700 hover:text-un-blue transition">Về chúng tôi</a>
+                    <a href="#dang-ky-thanh-vien" class="text-sm font-semibold text-slate-700 hover:text-un-blue transition">Đăng ký tình nguyện</a>
+                    <a href="#muc-tieu-sdgs" class="text-sm font-semibold text-slate-700 hover:text-un-blue transition">17 Mục tiêu SDGs</a>
+                    <a href="#tin-tuc" class="text-sm font-semibold text-slate-700 hover:text-un-blue transition">Thông tin</a>
+                    <a href="#van-ban-to-chuc" class="text-sm font-semibold text-slate-700 hover:text-un-blue transition">Văn bản & Tài liệu</a>
+                    <a href="#lien-he-dong-gop" class="text-sm font-semibold text-slate-700 hover:text-un-blue transition">Đóng góp</a>
+                </nav>
+
+                <!-- Header Actions & Admin Auth -->
+                <div class="hidden md:flex items-center gap-3">
+                    <div id="admin-auth-container">
+                        <button onclick="openLoginModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition cursor-pointer">
+                            <i data-lucide="shield" class="w-4 h-4 text-un-blue"></i>
+                            Quản trị Admin
+                        </button>
+                    </div>
+
+                    <a href="https://thiennguyen.app/user/congdongtinhnguyenxahoivietnam" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4.5 py-2.5 rounded-xl text-sm font-bold text-white bg-un-blue hover:bg-un-dark shadow-md shadow-un-blue/25 transition">
+                        <i data-lucide="heart" class="w-4 h-4 text-rose-200"></i>
+                        Đóng góp ngay
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="lg:hidden p-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-5 space-y-3 shadow-xl">
+            <a href="#trang-chu" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Trang chủ</a>
+            <a href="#ve-chung-toi" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Về chúng tôi</a>
+            <a href="#dang-ky-thanh-vien" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Đăng ký tình nguyện</a>
+            <a href="#muc-tieu-sdgs" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">17 Mục tiêu SDGs</a>
+            <a href="#tin-tuc" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Thông tin & Truyền thông</a>
+            <a href="#van-ban-to-chuc" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Văn bản & Tài liệu</a>
+            <a href="#lien-he-dong-gop" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Đóng góp & Liên hệ</a>
+            <div id="mobile-auth-actions" class="pt-3 border-t border-slate-100 space-y-2"></div>
+        </div>
+    </header>
+
+    <!-- =====================================================================
+         2. HERO SECTION
+    ====================================================================== -->
+    <section id="trang-chu" class="relative overflow-hidden bg-gradient-to-br from-un-deep via-un-dark to-un-blue text-white py-20 md:py-28">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-sky-200 font-semibold text-xs tracking-wider uppercase border border-white/20">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-sky-300"></i>
+                        Hành động vì Cộng đồng & Phát triển Bền vững
+                    </div>
+
+                    <h1 class="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+                        Cộng đồng Tình nguyện Xã hội Việt Nam
+                    </h1>
+
+                    <p class="text-sky-100 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                        Kết nối sức trẻ, chia sẻ yêu thương và thúc đẩy thực hiện <strong>17 Mục tiêu Phát triển Bền vững (SDGs)</strong> của Liên Hợp Quốc tại TP. Hồ Chí Minh và trên mọi miền Tổ quốc.
+                    </p>
+
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                        <a href="#tin-tuc" class="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white text-un-deep font-extrabold text-sm sm:text-base shadow-xl hover:bg-sky-50 transition transform hover:-translate-y-0.5">
+                            Khám phá hoạt động <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#dang-ky-thanh-vien" class="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/30 text-white font-extrabold text-sm sm:text-base backdrop-blur-md transition">
+                            <i data-lucide="user-plus" class="w-5 h-5 text-emerald-300"></i> Đăng ký tình nguyện viên
+                        </a>
+                    </div>
+
+                    <div id="hero-admin-cta" class="hidden pt-4 flex flex-wrap gap-3 justify-center lg:justify-start">
+                        <button onclick="openPostModal()" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-lg transition">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Đăng tin hoạt động mới
+                        </button>
+                        <button onclick="openDocModal()" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-lg transition">
+                            <i data-lucide="file-up" class="w-4 h-4"></i> Đăng tải văn bản mới
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5">
+                    <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white/20 shadow-2xl relative">
+                        <div class="absolute -top-4 -right-4 bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-white animate-ping"></span> Trực tuyến 24/7
+                        </div>
+
+                        <h3 class="font-display text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-sky-300"></i> Thông tin
+                        </h3>
+
+                        <div class="space-y-3.5 text-sm text-sky-100">
+                            <div class="flex items-start gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <i data-lucide="map-pin" class="w-5 h-5 text-sky-300 shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="text-xs text-sky-300 font-semibold uppercase">Trụ sở chính</p>
+                                    <p class="font-bold text-white">Thành phố Hồ Chí Minh, Việt Nam</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <i data-lucide="mail" class="w-5 h-5 text-sky-300 shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="text-xs text-sky-300 font-semibold uppercase">Email liên hệ</p>
+                                    <p class="font-bold text-white break-all">congdongtinhnguyenxahoivietnam@gmail.com</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <i data-lucide="facebook" class="w-5 h-5 text-sky-300 shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="text-xs text-sky-300 font-semibold uppercase">Fanpage chính thức</p>
+                                    <a href="https://www.facebook.com/CongdongTinhnguyenXahoiVietNam/" target="_blank" rel="noopener noreferrer" class="font-bold text-white underline hover:text-sky-200">
+                                        Cộng đồng Tình nguyện Xã hội Việt Nam
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-5 border-t border-white/15 flex items-center justify-between text-xs text-sky-200">
+                            <span>Tổng số bài viết hoạt động:</span>
+                            <span id="hero-post-count" class="font-mono font-extrabold text-white text-base">4</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         3. VỀ CHÚNG TÔI & ĐỊNH HƯỚNG 17 SDGS
+    ====================================================================== -->
+    <section id="ve-chung-toi" class="py-16 md:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="px-3.5 py-1 rounded-full bg-un-light text-un-blue font-bold text-xs uppercase tracking-wider">
+                    Sứ mệnh nhân văn
+                </span>
+                <h2 class="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 mt-3">
+                    Kết Nối Yêu Thương – Kiến Tạo Tương Lai Bền Vững
+                </h2>
+                <p class="text-slate-600 text-sm sm:text-base mt-4 leading-relaxed">
+                    <strong>Cộng đồng Tình nguyện Xã hội Việt Nam</strong> hoạt động với tôn chỉ quy tụ sức mạnh đoàn kết của cộng đồng, triển khai các dự án thiết thực bám sát 17 Mục tiêu Phát triển Bền vững (SDGs) của Liên Hợp Quốc tại Việt Nam.
+                </p>
+            </div>
+
+            <div id="muc-tieu-sdgs" class="pt-4">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                    <div>
+                        <span class="text-un-blue font-bold text-xs uppercase tracking-wider">Khung phát triển toàn cầu</span>
+                        <h3 class="font-display text-xl sm:text-2xl font-extrabold text-slate-900 mt-1">
+                            17 Mục tiêu Phát triển Bền vững (SDGs) tại Việt Nam
+                        </h3>
+                    </div>
+                    <p class="text-xs text-slate-500 max-w-sm">
+                        Nhấp vào bất kỳ mục tiêu nào bên dưới để lọc nhanh các bài viết và chiến dịch tương ứng trên hệ thống.
+                    </p>
+                </div>
+
+                <div id="sdg-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         4. ĐĂNG KÝ TÌNH NGUYÊN VIÊN & THÀNH VIÊN
+    ====================================================================== -->
+    <section id="dang-ky-thanh-vien" class="py-16 md:py-24 bg-slate-100 border-t border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-r from-un-deep to-un-blue rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute right-0 top-0 translate-x-12 -translate-y-12 w-80 h-80 rounded-full bg-white/10 pointer-events-none"></div>
+                
+                <div class="grid lg:grid-cols-12 gap-8 items-center relative z-10">
+                    <div class="lg:col-span-8 space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/25 text-white text-xs font-bold uppercase tracking-wider">
+                            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Tuyển dụng tình nguyện viên chính thức
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-4xl font-extrabold leading-tight">
+                            Tham Gia Mạng Lưới Tình Nguyện Viên VSVC
+                        </h2>
+                        <p class="text-sky-100 text-sm sm:text-base leading-relaxed max-w-2xl">
+                            Để tạo thuận lợi tối đa và đảm bảo bảo mật thông tin cá nhân, toàn bộ việc đăng ký tham gia tình nguyện viên, ban sự kiện và cộng tác viên đều được thực hiện qua biểu mẫu chuẩn của tổ chức.
+                        </p>
+                    </div>
+
+                    <div class="lg:col-span-4 flex flex-col items-center lg:items-end justify-center">
+                        <a href="https://forms.gle/cYGqx6JPRFdbNyKF9" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-white text-un-deep font-display font-extrabold text-base shadow-xl hover:bg-sky-50 transition transform hover:-translate-y-1">
+                            <i data-lucide="external-link" class="w-5 h-5 text-un-blue"></i>
+                            Điền Form Đăng Ký Ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         5. THÔNG TIN & TRUYỀN THÔNG
+    ====================================================================== -->
+    <section id="tin-tuc" class="py-16 md:py-24 bg-white border-t border-slate-200/70">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+                <div>
+                    <span class="text-un-blue font-bold text-sm uppercase tracking-wider">Bản tin cộng đồng</span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
+                        Thông tin & Truyền thông
+                    </h2>
+                    <p class="text-slate-600 text-sm sm:text-base mt-1">
+                        Cập nhật các chiến dịch cộng đồng, dự án SDGs thực tế tại Việt Nam.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <button onclick="seedInitialData()" title="Khôi phục lại dữ liệu mẫu" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer">
+                        <i data-lucide="database" class="w-3.5 h-3.5"></i>
+                        Khôi phục dữ liệu mẫu
+                    </button>
+                    <div id="admin-post-btn-wrapper" class="hidden">
+                        <button onclick="openPostModal()" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white bg-un-blue hover:bg-un-dark shadow-md shadow-un-blue/25 transition cursor-pointer">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            Đăng tin bài mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter & Search Bar -->
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 mb-8 flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <div class="relative min-w-[230px] flex-1 sm:flex-initial">
+                        <select id="filter-sdg" onchange="applyFilters()" class="w-full appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl px-4 py-2.5 pr-9 focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                            <option value="all">🌐 Tất cả 17 Mục tiêu SDGs</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none"></i>
+                    </div>
+
+                    <div class="relative min-w-[190px] flex-1 sm:flex-initial">
+                        <select id="filter-category" onchange="applyFilters()" class="w-full appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl px-4 py-2.5 pr-9 focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                            <option value="all">📂 Tất cả danh mục</option>
+                            <option value="Tin hoạt động">Tin hoạt động</option>
+                            <option value="Chiến dịch gây quỹ">Chiến dịch gây quỹ</option>
+                            <option value="Gương mặt tình nguyện">Gương mặt tình nguyện</option>
+                            <option value="Báo cáo minh bạch">Báo cáo minh bạch</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none"></i>
+                    </div>
+
+                    <button id="clear-filter-btn" onclick="clearFilters()" class="hidden items-center gap-1 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 transition cursor-pointer">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i> Xóa lọc
+                    </button>
+                </div>
+
+                <div class="relative w-full lg:w-80">
+                    <input type="text" id="search-input" oninput="applyFilters()" placeholder="Tìm kiếm bài viết, địa điểm..." class="w-full bg-white border border-slate-200 text-slate-700 text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                </div>
+            </div>
+
+            <div id="active-filter-banner" class="hidden mb-6 p-3.5 rounded-xl bg-un-tint border border-sky-200 flex items-center justify-between text-sm">
+                <div class="flex items-center gap-2 text-un-deep font-medium" id="active-filter-text"></div>
+                <button onclick="clearFilters()" class="text-xs font-bold text-un-blue hover:underline cursor-pointer">Xem tất cả bài viết</button>
+            </div>
+
+            <!-- Articles Grid -->
+            <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"></div>
+
+            <div id="empty-state" class="hidden text-center py-16 px-4 bg-slate-50 rounded-3xl border border-dashed border-slate-300">
+                <div class="w-16 h-16 rounded-2xl bg-un-light text-un-blue flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="file-search" class="w-8 h-8"></i>
+                </div>
+                <h3 class="font-display text-lg font-bold text-slate-900">Chưa tìm thấy tin bài phù hợp</h3>
+                <button onclick="clearFilters()" class="mt-4 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition cursor-pointer">
+                    Xem tất cả bài viết
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         6. VĂN BẢN & TÀI LIỆU
+    ====================================================================== -->
+    <section id="van-ban-to-chuc" class="py-16 md:py-24 bg-slate-50 border-t border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+                <div>
+                    <span class="text-un-blue font-bold text-sm uppercase tracking-wider">Hệ thống hành chính</span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
+                        Văn bản & Tài liệu
+                    </h2>
+                    <p class="text-slate-600 text-sm sm:text-base mt-1">
+                        Tra cứu thông báo, kế hoạch, chương trình, báo cáo, công văn, quyết định, danh sách và văn bản chính thức.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <div id="admin-doc-btn-wrapper" class="hidden">
+                        <button onclick="openDocModal()" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-md transition cursor-pointer">
+                            <i data-lucide="file-up" class="w-4 h-4"></i>
+                            Đăng tải văn bản mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 mb-6" id="doc-category-filters">
+                <button onclick="filterDocuments('all')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-un-blue text-white transition shadow-sm" data-category="all">📁 Tất cả văn bản</button>
+                <button onclick="filterDocuments('Thông báo')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition" data-category="Thông báo">📢 Thông báo</button>
+                <button onclick="filterDocuments('Kế hoạch')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition" data-category="Kế hoạch">📅 Kế hoạch</button>
+                <button onclick="filterDocuments('Chương trình')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition" data-category="Chương trình">🎯 Chương trình</button>
+                <button onclick="filterDocuments('Báo cáo')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition" data-category="Báo cáo">📊 Báo cáo</button>
+                <button onclick="filterDocuments('Công văn')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition" data-category="Công văn">✉️ Công văn</button>
+                <button onclick="filterDocuments('Quyết định')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition" data-category="Quyết định">📜 Quyết định</button>
+                <button onclick="filterDocuments('Danh sách')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition" data-category="Danh sách">📋 Danh sách</button>
+                <button onclick="filterDocuments('Văn bản khác')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition" data-category="Văn bản khác">📄 Văn bản khác</button>
+            </div>
+
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100/70 border-b border-slate-200 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                <th class="py-4 px-6">Số / Ký hiệu & Tiêu đề văn bản</th>
+                                <th class="py-4 px-4">Hạng mục</th>
+                                <th class="py-4 px-4">Ngày ban hành</th>
+                                <th class="py-4 px-4">Cơ quan ban hành</th>
+                                <th class="py-4 px-6 text-right">Tải về / Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documents-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         7. ĐÓNG GÓP & LIÊN HỆ
+    ====================================================================== -->
+    <section id="lien-he-dong-gop" class="py-16 md:py-24 bg-slate-100 border-t border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-12 gap-8 items-stretch">
+                <div class="lg:col-span-7 bg-gradient-to-br from-un-blue via-un-dark to-un-deep rounded-3xl p-8 sm:p-10 text-white shadow-xl relative overflow-hidden flex flex-col justify-between">
+                    <div class="space-y-4 relative z-10">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold tracking-wide uppercase">
+                            <i data-lucide="badge-check" class="w-4 h-4 text-emerald-300"></i>
+                            Cổng Đóng Góp Minh Bạch 24/7
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-extrabold leading-tight">Đóng góp</h2>
+                        <p class="text-sky-100 text-sm sm:text-base leading-relaxed">
+                            Mọi khoản đóng góp cho <strong>Cộng đồng Tình nguyện Xã hội Việt Nam</strong> đều được tiếp nhận và tự động sao kê công khai theo thời gian thực thông qua nền tảng <strong>Thiện Nguyện App</strong>.
+                        </p>
+                        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 sm:p-5 mt-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs text-sky-200 uppercase font-semibold">Tài khoản Thiện Nguyện chính thức</p>
+                                    <p class="font-mono text-sm sm:text-base font-bold text-white mt-0.5 break-all">thiennguyen.app/user/congdongtinhnguyenxahoivietnam</p>
+                                </div>
+                                <button onclick="copyText('https://thiennguyen.app/user/congdongtinhnguyenxahoivietnam', 'Đã sao chép liên kết!')" class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-xs font-semibold transition cursor-pointer">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Sao chép link
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-8 relative z-10">
+                        <a href="https://thiennguyen.app/user/congdongtinhnguyenxahoivietnam" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl bg-white text-un-deep font-extrabold text-sm sm:text-base shadow-lg hover:bg-sky-50 transition transform hover:-translate-y-0.5">
+                            <i data-lucide="external-link" class="w-5 h-5 text-un-blue"></i> Đóng góp & Xem sao kê tại Thiện Nguyện App
+                        </a>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span class="text-un-blue font-bold text-xs uppercase tracking-wider">Kết nối & Hợp tác</span>
+                        <h3 class="font-display text-2xl font-extrabold text-slate-900 mt-1">Thông tin liên hệ</h3>
+                        <div class="space-y-4 mt-6">
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                                <div class="w-10 h-10 rounded-xl bg-un-light text-un-blue flex items-center justify-center shrink-0"><i data-lucide="map-pin" class="w-5 h-5"></i></div>
+                                <div><p class="text-xs font-semibold text-slate-400 uppercase">Trụ sở</p><p class="text-sm font-bold text-slate-800 mt-0.5">Thành phố Hồ Chí Minh, Việt Nam</p></div>
+                            </div>
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                                <div class="w-10 h-10 rounded-xl bg-un-light text-un-blue flex items-center justify-center shrink-0"><i data-lucide="mail" class="w-5 h-5"></i></div>
+                                <div><p class="text-xs font-semibold text-slate-400 uppercase">Email</p><a href="mailto:congdongtinhnguyenxahoivietnam@gmail.com" class="text-sm font-bold text-un-blue hover:underline mt-0.5 block break-all">congdongtinhnguyenxahoivietnam@gmail.com</a></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-5 border-t border-slate-100">
+                        <a href="https://www.facebook.com/CongdongTinhnguyenXahoiVietNam/" target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-900 hover:bg-un-blue text-white text-sm font-semibold transition">
+                            <i data-lucide="message-circle" class="w-4 h-4"></i> Nhắn tin qua Fanpage Facebook
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-300 pt-14 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
+            <p class="text-xs text-slate-500">© 2026 Cộng đồng Tình nguyện Xã hội Việt Nam. Bảo lưu mọi quyền.</p>
+        </div>
+    </footer>
+
+    <!-- MODALS -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm p-4 flex items-center justify-center">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl relative">
+            <button onclick="closeLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h3 class="font-display text-xl font-extrabold text-slate-900 mb-2">Đăng Nhập Quản Trị Viên</h3>
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <input type="password" id="admin-password" required placeholder="Nhập mật khẩu quản trị..." class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:border-un-blue">
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeLoginModal()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100">Hủy</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-slate-900">Xác thực</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="post-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="min-h-full flex items-center justify-center">
+            <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden">
+                <div class="bg-un-blue px-6 py-4 text-white flex items-center justify-between">
+                    <h3 id="modal-form-title" class="font-display font-bold text-lg">Đăng Tin Bài Mới</h3>
+                    <button onclick="closePostModal()"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <form id="article-form" onsubmit="saveArticle(event)" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                    <input type="hidden" id="edit-article-id" value="">
+                    <div><label class="block text-xs font-bold uppercase mb-1">Tiêu đề bài viết *</label><input type="text" id="post-title" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm"></div>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold uppercase mb-1">Mục tiêu SDG *</label><select id="post-sdg" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white"></select></div>
+                        <div><label class="block text-xs font-bold uppercase mb-1">Danh mục *</label><select id="post-category" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white"><option value="Tin hoạt động">Tin hoạt động</option><option value="Chiến dịch gây quỹ">Chiến dịch gây quỹ</option><option value="Gương mặt tình nguyện">Gương mặt tình nguyện</option><option value="Báo cáo minh bạch">Báo cáo minh bạch</option></select></div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold uppercase mb-1">Tác giả *</label><input type="text" id="post-author" required value="Ban Truyền thông VSVC" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm"></div>
+                        <div><label class="block text-xs font-bold uppercase mb-1">Địa điểm</label><input type="text" id="post-location" value="Thành phố Hồ Chí Minh" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm"></div>
+                    </div>
+                    <div><label class="block text-xs font-bold uppercase mb-1">Link ảnh bìa (URL)</label><input type="url" id="post-image" placeholder="https://..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm"></div>
+                    <div><label class="block text-xs font-bold uppercase mb-1">Link bài viết đính kèm (Tùy chọn)</label><input type="url" id="post-external-link" placeholder="https://..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm"></div>
+                    <div><label class="block text-xs font-bold uppercase mb-1">Tóm tắt ngắn *</label><textarea id="post-summary" rows="2" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm"></textarea></div>
+                    <div><label class="block text-xs font-bold uppercase mb-1">Nội dung chi tiết *</label><textarea id="post-content" rows="4" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm"></textarea></div>
+                    <div class="pt-3 border-t flex justify-end gap-3"><button type="button" onclick="closePostModal()" class="px-5 py-2.5 rounded-xl bg-slate-100 text-sm font-semibold">Hủy</button><button type="submit" class="px-6 py-2.5 rounded-xl bg-un-blue text-white text-sm font-bold">Xuất bản</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="doc-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="min-h-full flex items-center justify-center">
+            <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden">
+                <div class="bg-amber-600 px-6 py-4 text-white flex items-center justify-between"><h3 class="font-display font-bold text-lg">Đăng Tải Văn Bản</h3><button onclick="closeDocModal()"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+                <form onsubmit="saveDocument(event)" class="p-6 space-y-4">
+                    <div><label class="block text-xs font-bold uppercase mb-1">Số / Ký hiệu *</label><input type="text" id="doc-code" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm"></div>
+                    <div><label class="block text-xs font-bold uppercase mb-1">Tiêu đề văn bản *</label><input type="text" id="doc-title" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm"></div>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold uppercase mb-1">Hạng mục *</label><select id="doc-category" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white"><option value="Thông báo">Thông báo</option><option value="Kế hoạch">Kế hoạch</option><option value="Chương trình">Chương trình</option><option value="Báo cáo">Báo cáo</option><option value="Công văn">Công văn</option><option value="Quyết định">Quyết định</option><option value="Danh sách">Danh sách</option><option value="Văn bản khác">Văn bản khác</option></select></div>
+                        <div><label class="block text-xs font-bold uppercase mb-1">Cơ quan</label><input type="text" id="doc-issuer" value="Ban Điều phối VSVC" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm"></div>
+                    </div>
+                    <div><label class="block text-xs font-bold uppercase mb-1">Link tệp tải về (PDF/URL) *</label><input type="url" id="doc-file-url" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm"></div>
+                    <div class="pt-3 border-t flex justify-end gap-3"><button type="button" onclick="closeDocModal()" class="px-5 py-2.5 rounded-xl bg-slate-100 text-sm font-semibold">Hủy</button><button type="submit" class="px-6 py-2.5 rounded-xl bg-amber-600 text-white text-sm font-bold">Lưu văn bản</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/70 backdrop-blur-sm p-4">
+        <div class="min-h-full flex items-center justify-center">
+            <div class="bg-white rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden">
+                <div class="relative h-64 bg-slate-200">
+                    <img id="detail-image" src="" class="w-full h-full object-cover">
+                    <button onclick="closeDetailModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <div class="absolute bottom-5 left-6 right-6 text-white">
+                        <span id="detail-sdg-badge" class="px-3 py-1 rounded-lg text-xs font-bold"></span>
+                        <h2 id="detail-title" class="font-display text-xl sm:text-2xl font-extrabold mt-1"></h2>
+                    </div>
+                </div>
+                <div class="p-6 max-h-[60vh] overflow-y-auto space-y-4">
+                    <div class="flex gap-4 text-xs text-slate-500 pb-3 border-b">
+                        <span id="detail-author"></span> • <span id="detail-date"></span> • <span id="detail-location"></span>
+                    </div>
+                    <p id="detail-summary" class="font-semibold text-slate-800 bg-un-tint p-4 rounded-xl border-l-4 border-un-blue"></p>
+                    <div id="detail-content" class="text-slate-600 text-sm whitespace-pre-line leading-relaxed"></div>
+                    <div id="detail-external-link-box" class="hidden p-4 rounded-xl bg-sky-50 border border-sky-200 flex justify-between items-center">
+                        <span id="detail-external-link-text" class="text-xs truncate max-w-md"></span>
+                        <a id="detail-external-link-anchor" href="#" target="_blank" class="px-3 py-1.5 rounded-lg bg-un-blue text-white text-xs font-bold">Mở link</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let articlesCache = [];
+        let documentsCache = [];
+        let isAdminLoggedIn = sessionStorage.getItem("vsvc_admin_auth") === "true";
+        let currentDocCategoryFilter = 'all';
+
+        const UN_SDGs = [
+            { id: 1, name: "Xóa nghèo", color: "#E5243B", icon: "hand-coins" },
+            { id: 2, name: "Không còn nạn đói", color: "#DDA63A", icon: "wheat" },
+            { id: 3, name: "Sức khỏe và cuộc sống tốt", color: "#4C9F38", icon: "heart-pulse" },
+            { id: 4, name: "Giáo dục có chất lượng", color: "#C5192D", icon: "book-open" },
+            { id: 5, name: "Bình đẳng giới", color: "#FF3A21", icon: "scale" },
+            { id: 6, name: "Nước sạch và vệ sinh", color: "#26BDE2", icon: "droplets" },
+            { id: 7, name: "Năng lượng sạch", color: "#FCC30B", icon: "sun" },
+            { id: 8, name: "Tăng trưởng kinh tế", color: "#A21942", icon: "briefcase" },
+            { id: 9, name: "Công nghiệp và hạ tầng", color: "#FD6925", icon: "cpu" },
+            { id: 10, name: "Giảm bất bình đẳng", color: "#DD1367", icon: "equal" },
+            { id: 11, name: "Cộng đồng bền vững", color: "#FD9D24", icon: "building-2" },
+            { id: 12, name: "Tiêu thụ có trách nhiệm", color: "#BF8B2E", icon: "recycle" },
+            { id: 13, name: "Hành động về khí hậu", color: "#3F7E44", icon: "cloud-sun-rain" },
+            { id: 14, name: "Sinh thái biển", color: "#0A97D9", icon: "waves" },
+            { id: 15, name: "Sinh thái đất", color: "#56C02B", icon: "trees" },
+            { id: 16, name: "Hòa bình và công lý", color: "#00689D", icon: "landmark" },
+            { id: 17, name: "Quan hệ đối tác", color: "#19486A", icon: "handshake" }
+        ];
+
+        const INITIAL_ARTICLES = [
+            {
+                id: "vsvc-03",
+                title: "HÀNH TRÌNH LỊCH SỬ – CHỦ ĐỀ “TỰ HÀO NGƯỜI PHỤ NỮ VIỆT NAM”",
+                sdgId: 1,
+                category: "Tin hoạt động",
+                author: "Ban Truyền thông VSVC",
+                location: "Thành phố Hồ Chí Minh",
+                date: "18/11/2026",
+                image: "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?auto=format&fit=crop&w=900&q=80",
+                externalLink: "",
+                summary: "Chương trình tri ân và hỗ trợ phụ nữ có hoàn cảnh khó khăn tại TP.HCM nhân dịp chuỗi hoạt động cộng đồng.",
+                content: "Hành trình lịch sử với chủ đề tự hào người phụ nữ Việt Nam đã diễn ra thành công tốt đẹp với sự tham gia đông đảo của các tình nguyện viên."
+            },
+            {
+                id: "vsvc-01",
+                title: "Hành Trình Tri Thức Xanh: Trao Tặng Thư Viện & Học Bổng Cho Trẻ Em Vùng Cao",
+                sdgId: 4,
+                category: "Tin hoạt động",
+                author: "Ban Dự án Giáo dục VSVC",
+                location: "Hà Giang & Yên Bái",
+                date: "12/11/2026",
+                image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=900&q=80",
+                externalLink: "",
+                summary: "Dự án hiện thực hóa Mục tiêu SDG 4 (Giáo dục có chất lượng), mang hơn 2.500 đầu sách thiếu nhi và 50 suất học bổng.",
+                content: "Với niềm tin giáo dục là chìa khóa bền vững nhất..."
+            },
+            {
+                id: "vsvc-02",
+                title: "Phủ Xanh Rừng Ngập Mặn Cần Giờ – Lá Phổi Xanh Ứng Phó Biến Đổi Khí Hậu",
+                sdgId: 13,
+                category: "Chiến dịch gây quỹ",
+                author: "Nhóm Hành động Khí hậu TP.HCM",
+                location: "Huyện Cần Giờ, TP. Hồ Chí Minh",
+                date: "05/11/2026",
+                image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=900&q=80",
+                externalLink: "",
+                summary: "Hơn 120 tình nguyện viên trồng mới 3.000 cây đước ngập mặn bảo vệ hệ sinh thái ven biển.",
+                content: "Rừng ngập mặn Cần Giờ là khu dự trữ sinh quyển thế giới..."
+            }
+        ];
+
+        const INITIAL_DOCUMENTS = [
+            {
+                id: "doc-01",
+                code: "01/TB-VSVC",
+                title: "Thông báo về việc phát động chiến dịch tình nguyện Mùa hè xanh năm 2026",
+                category: "Thông báo",
+                date: "10/06/2026",
+                issuer: "Ban Điều phối VSVC",
+                fileUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+            }
+        ];
+
+        window.onload = function() {
+            loadCustomLogo();
+            const saved = localStorage.getItem("vsvc_persistent_articles");
+            if (saved) {
+                try { articlesCache = JSON.parse(saved); } catch(e) { articlesCache = [...INITIAL_ARTICLES]; }
+            } else {
+                articlesCache = [...INITIAL_ARTICLES];
+            }
+
+            const savedDoc = localStorage.getItem("vsvc_persistent_documents");
+            if (savedDoc) {
+                try { documentsCache = JSON.parse(savedDoc); } catch(e) { documentsCache = [...INITIAL_DOCUMENTS]; }
+            } else {
+                documentsCache = [...INITIAL_DOCUMENTS];
+            }
+
+            renderSDGGrid();
+            populateSDGSelects();
+            applyFilters();
+            renderDocuments('all');
+            updateAdminUI();
+            lucide.createIcons();
+        };
+
+        window.seedInitialData = function() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            articlesCache = [...INITIAL_ARTICLES];
+            documentsCache = [...INITIAL_DOCUMENTS];
+            localStorage.setItem("vsvc_persistent_articles", JSON.stringify(articlesCache));
+            localStorage.setItem("vsvc_persistent_documents", JSON.stringify(documentsCache));
+            applyFilters();
+            renderDocuments('all');
+            showToast("Đã khôi phục dữ liệu mẫu chuẩn!", "success");
+        }
+
+        window.openLoginModal = function() { document.getElementById("login-modal").classList.remove("hidden"); }
+        window.closeLoginModal = function() { document.getElementById("login-modal").classList.add("hidden"); }
+
+        window.handleAdminLogin = function(e) {
+            e.preventDefault();
+            if (document.getElementById("admin-password").value === "vsvc2026@admin") {
+                isAdminLoggedIn = true;
+                sessionStorage.setItem("vsvc_admin_auth", "true");
+                closeLoginModal();
+                updateAdminUI();
+                showToast("Đăng nhập Admin thành công!", "success");
+            } else {
+                showToast("Mật khẩu sai!", "error");
+            }
+        }
+
+        window.handleAdminLogout = function() {
+            isAdminLoggedIn = false;
+            sessionStorage.removeItem("vsvc_admin_auth");
+            updateAdminUI();
+            showToast("Đã đăng xuất.", "info");
+        }
+
+        function updateAdminUI() {
+            const authContainer = document.getElementById("admin-auth-container");
+            const adminPostBtn = document.getElementById("admin-post-btn-wrapper");
+            const adminDocBtn = document.getElementById("admin-doc-btn-wrapper");
+            const heroCta = document.getElementById("hero-admin-cta");
+            const logoUpload = document.getElementById("admin-logo-upload-btn");
+
+            if (isAdminLoggedIn) {
+                if (logoUpload) logoUpload.classList.remove("hidden");
+                authContainer.innerHTML = `<button onclick="handleAdminLogout()" class="px-3 py-2 rounded-xl text-xs bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">Đăng xuất Admin</button>`;
+                if (adminPostBtn) adminPostBtn.classList.remove("hidden");
+                if (adminDocBtn) adminDocBtn.classList.remove("hidden");
+                if (heroCta) heroCta.classList.remove("hidden");
+            } else {
+                if (logoUpload) logoUpload.classList.add("hidden");
+                authContainer.innerHTML = `<button onclick="openLoginModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 border border-slate-200">Quản trị Admin</button>`;
+                if (adminPostBtn) adminPostBtn.classList.add("hidden");
+                if (adminDocBtn) adminDocBtn.classList.add("hidden");
+                if (heroCta) heroCta.classList.add("hidden");
+            }
+            applyFilters();
+        }
+
+        function loadCustomLogo() {
+            const logo = localStorage.getItem("vsvc_custom_logo");
+            if (logo) {
+                document.getElementById("site-logo-img").src = logo;
+                document.getElementById("site-logo-img").classList.remove("hidden");
+                document.getElementById("site-logo-default").classList.add("hidden");
+            }
+        }
+
+        window.handleLogoUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                localStorage.setItem("vsvc_custom_logo", evt.target.result);
+                loadCustomLogo();
+                showToast("Đổi logo thành công!", "success");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderSDGGrid() {
+            document.getElementById("sdg-grid").innerHTML = UN_SDGs.map(sdg => `
+                <button onclick="filterBySDG(${sdg.id})" style="background-color: ${sdg.color};" class="rounded-2xl p-4 text-left text-white shadow hover:shadow-lg transition flex flex-col justify-between min-h-[110px] cursor-pointer">
+                    <span class="font-display font-extrabold text-2xl">${sdg.id}</span>
+                    <p class="font-bold text-xs line-clamp-2">${sdg.name}</p>
+                </button>
+            `).join("");
+        }
+
+        function populateSDGSelects() {
+            const opts = UN_SDGs.map(s => `<option value="${s.id}">SDG ${s.id}: ${s.name}</option>`).join("");
+            document.getElementById("filter-sdg").innerHTML = `<option value="all">🌐 Tất cả 17 Mục tiêu SDGs</option>` + opts;
+            document.getElementById("post-sdg").innerHTML = opts;
+        }
+
+        window.filterBySDG = function(id) {
+            document.getElementById("filter-sdg").value = String(id);
+            applyFilters();
+            document.getElementById("tin-tuc").scrollIntoView({ behavior: "smooth" });
+        }
+
+        window.applyFilters = function() {
+            const sdg = document.getElementById("filter-sdg").value;
+            const cat = document.getElementById("filter-category").value;
+            const kw = document.getElementById("search-input").value.toLowerCase();
+
+            const filtered = articlesCache.filter(a => {
+                return (sdg === "all" || Number(a.sdgId) === Number(sdg)) &&
+                       (cat === "all" || a.category === cat) &&
+                       (!kw || a.title.toLowerCase().includes(kw) || a.summary.toLowerCase().includes(kw));
+            });
+
+            document.getElementById("clear-filter-btn").classList.toggle("hidden", sdg === "all" && cat === "all" && !kw);
+            renderArticles(filtered);
+            document.getElementById("hero-post-count").textContent = articlesCache.length;
+        }
+
+        window.clearFilters = function() {
+            document.getElementById("filter-sdg").value = "all";
+            document.getElementById("filter-category").value = "all";
+            document.getElementById("search-input").value = "";
+            applyFilters();
+        }
+
+        function renderArticles(list) {
+            const grid = document.getElementById("articles-grid");
+            const empty = document.getElementById("empty-state");
+            if (list.length === 0) {
+                grid.innerHTML = "";
+                empty.classList.remove("hidden");
+                return;
+            }
+            empty.classList.add("hidden");
+            grid.innerHTML = list.map(a => {
+                const sdg = UN_SDGs.find(s => s.id === Number(a.sdgId)) || UN_SDGs[0];
+                return `
+                    <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition flex flex-col justify-between">
+                        <div>
+                            <div class="relative h-52 bg-slate-100 cursor-pointer" onclick="openDetailModal('${a.id}')">
+                                <img src="${a.image}" class="w-full h-full object-cover">
+                                <span style="background-color: ${sdg.color};" class="absolute top-3 left-3 px-3 py-1 rounded-xl text-white text-xs font-bold">SDG ${sdg.id}</span>
+                            </div>
+                            <div class="p-6">
+                                <div class="text-xs text-slate-400 mb-2">${a.date} • ${a.location || 'Việt Nam'}</div>
+                                <h3 onclick="openDetailModal('${a.id}')" class="font-bold text-lg text-slate-900 hover:text-un-blue cursor-pointer line-clamp-2">${a.title}</h3>
+                                <p class="text-slate-600 text-sm mt-2 line-clamp-3">${a.summary}</p>
+                            </div>
+                        </div>
+                        <div class="px-6 py-4 bg-slate-50 border-t flex justify-between items-center">
+                            <button onclick="openDetailModal('${a.id}')" class="text-sm font-bold text-un-blue hover:underline">Đọc chi tiết →</button>
+                            ${isAdminLoggedIn ? `<button onclick="promptDelete('${a.id}', 'article')" class="text-rose-600 text-xs font-bold">Xóa</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        window.openPostModal = function() {
+            document.getElementById("article-form").reset();
+            document.getElementById("post-modal").classList.remove("hidden");
+        }
+        window.closePostModal = function() { document.getElementById("post-modal").classList.add("hidden"); }
+
+        window.saveArticle = function(e) {
+            e.preventDefault();
+            const newArticle = {
+                id: "vsvc-" + Date.now(),
+                title: document.getElementById("post-title").value,
+                sdgId: Number(document.getElementById("post-sdg").value),
+                category: document.getElementById("post-category").value,
+                author: document.getElementById("post-author").value,
+                location: document.getElementById("post-location").value,
+                date: new Date().toLocaleDateString('vi-VN'),
+                image: document.getElementById("post-image").value || "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=900&q=80",
+                externalLink: document.getElementById("post-external-link").value,
+                summary: document.getElementById("post-summary").value,
+                content: document.getElementById("post-content").value
+            };
+            articlesCache.unshift(newArticle);
+            localStorage.setItem("vsvc_persistent_articles", JSON.stringify(articlesCache));
+            clearFilters();
+            closePostModal();
+            showToast("Đăng bài thành công!", "success");
+        }
+
+        window.openDetailModal = function(id) {
+            const a = articlesCache.find(x => x.id === id);
+            if (!a) return;
+            const sdg = UN_SDGs.find(s => s.id === Number(a.sdgId)) || UN_SDGs[0];
+            document.getElementById("detail-image").src = a.image;
+            document.getElementById("detail-sdg-badge").style.backgroundColor = sdg.color;
+            document.getElementById("detail-sdg-badge").textContent = `SDG ${sdg.id}: ${sdg.name}`;
+            document.getElementById("detail-title").textContent = a.title;
+            document.getElementById("detail-author").textContent = a.author;
+            document.getElementById("detail-date").textContent = a.date;
+            document.getElementById("detail-location").textContent = a.location;
+            document.getElementById("detail-summary").textContent = a.summary;
+            document.getElementById("detail-content").textContent = a.content;
+            
+            const extBox = document.getElementById("detail-external-link-box");
+            if (a.externalLink) {
+                document.getElementById("detail-external-link-text").textContent = a.externalLink;
+                document.getElementById("detail-external-link-anchor").href = a.externalLink;
+                extBox.classList.remove("hidden");
+            } else {
+                extBox.classList.add("hidden");
+            }
+            document.getElementById("detail-modal").classList.remove("hidden");
+        }
+        window.closeDetailModal = function() { document.getElementById("detail-modal").classList.add("hidden"); }
+
+        window.openDocModal = function() { document.getElementById("doc-modal").classList.remove("hidden"); }
+        window.closeDocModal = function() { document.getElementById("doc-modal").classList.add("hidden"); }
+
+        window.saveDocument = function(e) {
+            e.preventDefault();
+            const doc = {
+                id: "doc-" + Date.now(),
+                code: document.getElementById("doc-code").value,
+                title: document.getElementById("doc-title").value,
+                category: document.getElementById("doc-category").value,
+                date: new Date().toLocaleDateString('vi-VN'),
+                issuer: document.getElementById("doc-issuer").value,
+                fileUrl: document.getElementById("doc-file-url").value
+            };
+            documentsCache.unshift(doc);
+            localStorage.setItem("vsvc_persistent_documents", JSON.stringify(documentsCache));
+            renderDocuments(currentDocCategoryFilter);
+            closeDocModal();
+            showToast("Đăng văn bản thành công!", "success");
+        }
+
+        window.filterDocuments = function(cat) {
+            currentDocCategoryFilter = cat;
+            renderDocuments(cat);
+        }
+
+        function renderDocuments(cat) {
+            const list = cat === 'all' ? documentsCache : documentsCache.filter(d => d.category === cat);
+            const tbody = document.getElementById("documents-table-body");
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">Chưa có văn bản.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = list.map(d => `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-4 px-6"><div class="font-mono text-xs font-bold text-un-blue">${d.code}</div><div class="font-semibold text-sm">${d.title}</div></td>
+                    <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-700">${d.category}</span></td>
+                    <td class="py-4 px-4 text-xs text-slate-500">${d.date}</td>
+                    <td class="py-4 px-4 text-xs text-slate-600">${d.issuer}</td>
+                    <td class="py-4 px-6 text-right"><a href="${d.fileUrl}" target="_blank" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-un-blue text-white">Tải về</a></td>
+                </tr>
+            `).join("");
+        }
+
+        window.promptDelete = function(id, type) {
+            if (type === 'article') {
+                articlesCache = articlesCache.filter(a => a.id !== id);
+                localStorage.setItem("vsvc_persistent_articles", JSON.stringify(articlesCache));
+                applyFilters();
+                showToast("Đã xóa bài viết.", "info");
+            }
+        }
+
+        window.toggleMobileMenu = function() { document.getElementById("mobile-menu").classList.toggle("hidden"); }
+        window.copyText = function(t, m) { navigator.clipboard.writeText(t); showToast(m, "success"); }
+        window.showToast = function(msg, type = "success") {
+            const c = document.getElementById("toast-container");
+            const t = document.createElement("div");
+            t.className = `${type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'} text-white px-4 py-3 rounded-xl shadow text-sm font-medium`;
+            t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
