@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'admin'
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+
+    // Public content: everyone can view; only active administrators can modify.
+    match /articles/{articleId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /documents/{documentId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Only these two settings documents are public. Keep future settings private by default.
+    match /settings/brand {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /settings/deleted_items {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /admins/{userId} {
+      allow get: if request.auth != null && request.auth.uid == userId;
+      allow list, create, update, delete: if false;
+    }
+  }
+}
