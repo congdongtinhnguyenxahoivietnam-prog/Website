@@ -10,6 +10,10 @@ Static website for Cloudflare Pages. The root `index.html` is the Pages entry po
 - Build output directory: `.`
 - Root directory: `/`
 
+### Preview deployments
+
+The Cloudflare Pages project is connected to this repository. Pushes to `deploy/cloudflare-pages-preview` are intended to create a non-production preview deployment. Review the generated `*.pages.dev` preview URL before merging the pull request. The `main` branch remains the production branch.
+
 Do not configure a production custom domain until the organization confirms the exact domain for this website. The previously discussed QR attendance domain may belong to a separate project.
 
 ## Firebase services used
