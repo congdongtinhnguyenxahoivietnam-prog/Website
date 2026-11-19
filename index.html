@@ -997,7 +997,8 @@
                 <i data-lucide="trash-2" class="w-6 h-6"></i>
             </div>
             <h3 id="delete-modal-title" class="font-display text-lg font-bold text-slate-900">Xác nhận xóa bài viết?</h3>
-            <p id="delete-modal-desc" class="text-sm text-slate-500 mt-1.5">                Hành động này sẽ xóa vĩnh viễn mục này khỏi hệ thống trên tất cả thiết bị.
+            <p id="delete-modal-desc" class="text-sm text-slate-500 mt-1.5">
+                Hành động này sẽ xóa vĩnh viễn mục này khỏi hệ thống trên tất cả thiết bị.
             </p>
             <div class="mt-6 flex justify-end gap-3">
                 <button onclick="closeDeleteModal()" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer">
@@ -1996,7 +1997,8 @@
         };
 
         window.editArticle = function(id) {
-            if (!isAdminLoggedIn) { openLoginModal(); return; }            const article = articlesCache.find(a => a.id === id);
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            const article = articlesCache.find(a => a.id === id);
             if (!article) return;
 
             document.getElementById("edit-article-id").value = article.id;
