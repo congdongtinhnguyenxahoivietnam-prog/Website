@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CỘNG ĐỒNG TÌNH NGUYỆN XÃ HỘI VIỆT NAM | 17 Mục tiêu Phát triển Bền vững (SDGs)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'un-blue': '#009EDB',
+                        'un-dark': '#007BB8',
+                        'un-deep': '#0A4D68',
+                        'un-light': '#E6F4FA',
+                        'un-tint': '#F0F9FF'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-un-blue selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2.5 pointer-events-none"></div>
+
+    <!-- =====================================================================
+         1. HEADER & NAVIGATION
+    ====================================================================== -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20 gap-3">
+                
+                <!-- Logo & Single-Line Uppercase Brand Name -->
+                <div class="flex items-center gap-3 min-w-0 shrink-0">
+                    <!-- Logo Container (Admin Upload Enabled) -->
+                    <div class="relative group shrink-0">
+                        <div id="header-logo-box" class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-un-blue to-un-deep flex items-center justify-center text-white shadow-md shadow-un-blue/30 overflow-hidden border border-slate-200/60">
+                            <i data-lucide="globe-2" class="w-6 h-6"></i>
+                        </div>
+                        <!-- Admin Logo Upload Trigger (Hidden unless Admin is logged in) -->
+                        <button id="admin-logo-upload-btn" onclick="triggerLogoUpload()" title="Tải lên / Thay đổi Logo tổ chức (Chỉ Admin)" class="hidden absolute inset-0 bg-slate-900/75 text-white rounded-2xl flex-col items-center justify-center text-[9px] font-bold uppercase tracking-tight cursor-pointer opacity-95 hover:opacity-100 transition">
+                            <i data-lucide="camera" class="w-3.5 h-3.5 mb-0.5"></i>
+                            <span>Đổi Logo</span>
+                        </button>
+                        <input type="file" id="logo-file-input" accept="image/*" class="hidden" onchange="handleLogoFileChange(event)">
+                    </div>
+
+                    <a href="#trang-chu" class="block min-w-0">
+                        <span class="block font-display font-extrabold text-slate-900 text-[11px] sm:text-xs xl:text-sm tracking-tight uppercase whitespace-nowrap hover:text-un-blue transition">
+                            CỘNG ĐỒNG TÌNH NGUYỆN XÃ HỘI VIỆT NAM
+                        </span>
+                        <span class="block text-[10px] sm:text-[11px] text-un-blue font-bold tracking-wider uppercase whitespace-nowrap">
+                            Vietnam Social Volunteer Community • SDGs
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Desktop Nav Links -->
+                <nav class="hidden xl:flex items-center gap-4">
+                    <a href="#trang-chu" class="text-xs font-semibold text-slate-700 hover:text-un-blue transition whitespace-nowrap">Trang chủ</a>
+                    <a href="#ve-chung-toi" class="text-xs font-semibold text-slate-700 hover:text-un-blue transition whitespace-nowrap">Về chúng tôi</a>
+                    <a href="#dang-ky-thanh-vien" class="text-xs font-semibold text-slate-700 hover:text-un-blue transition whitespace-nowrap">Đăng ký tình nguyện</a>
+                    <a href="#muc-tieu-sdgs" class="text-xs font-semibold text-slate-700 hover:text-un-blue transition whitespace-nowrap">17 Mục tiêu SDGs</a>
+                    <a href="#tin-tuc" class="text-xs font-semibold text-slate-700 hover:text-un-blue transition whitespace-nowrap">Thông tin</a>
+                    <a href="#van-ban-to-chuc" class="text-xs font-semibold text-slate-700 hover:text-un-blue transition whitespace-nowrap">Văn bản & Tài liệu</a>
+                    <a href="#ban-do-muu-sinh" class="text-xs font-semibold text-slate-700 hover:text-un-blue transition whitespace-nowrap">Bản đồ mưu sinh</a>
+                    <a href="#lien-he-dong-gop" class="text-xs font-semibold text-slate-700 hover:text-un-blue transition whitespace-nowrap">Đóng góp</a>
+                </nav>
+
+                <!-- Header Actions & Admin Auth -->
+                <div class="hidden md:flex items-center gap-2 shrink-0">
+                    <div id="admin-auth-container" class="flex items-center gap-2">
+                        <button onclick="openLoginModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition cursor-pointer whitespace-nowrap">
+                            <i data-lucide="shield" class="w-3.5 h-3.5 text-un-blue"></i>
+                            Quản trị Admin
+                        </button>
+                    </div>
+
+                    <a href="https://thiennguyen.app/user/congdongtinhnguyenxahoivietnam" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-un-blue hover:bg-un-dark shadow-md shadow-un-blue/25 transition whitespace-nowrap">
+                        <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-200"></i>
+                        Đóng góp ngay
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="xl:hidden p-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition shrink-0">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden xl:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-5 space-y-2.5 shadow-xl">
+            <a href="#trang-chu" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Trang chủ</a>
+            <a href="#ve-chung-toi" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Về chúng tôi</a>
+            <a href="#dang-ky-thanh-vien" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Đăng ký tình nguyện</a>
+            <a href="#muc-tieu-sdgs" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">17 Mục tiêu SDGs</a>
+            <a href="#tin-tuc" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Thông tin & Truyền thông</a>
+            <a href="#van-ban-to-chuc" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Văn bản & Tài liệu</a>
+            <a href="#ban-do-muu-sinh" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Bản đồ mưu sinh</a>
+            <a href="#lien-he-dong-gop" onclick="toggleMobileMenu()" class="block py-2 text-sm font-semibold text-slate-700">Đóng góp & Liên hệ</a>
+            <div id="mobile-auth-actions" class="pt-3 border-t border-slate-100 space-y-2">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+    </header>
+
+    <!-- =====================================================================
+         2. HERO SECTION
+    ====================================================================== -->
+    <section id="trang-chu" class="relative overflow-hidden bg-gradient-to-br from-un-deep via-un-dark to-un-blue text-white py-20 md:py-28">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-sky-200 font-semibold text-xs tracking-wider uppercase border border-white/20">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-sky-300"></i>
+                        Hành động vì Cộng đồng & Phát triển Bền vững
+                    </div>
+
+                    <h1 class="font-display text-3xl sm:text-5xl lg:text-5xl font-extrabold tracking-tight leading-tight uppercase">
+                        CỘNG ĐỒNG TÌNH NGUYỆN XÃ HỘI VIỆT NAM
+                    </h1>
+
+                    <p class="text-sky-100 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                        Kết nối sức trẻ, chia sẻ yêu thương và thúc đẩy thực hiện <strong>17 Mục tiêu Phát triển Bền vững (SDGs)</strong> của Liên Hợp Quốc tại TP. Hồ Chí Minh và trên mọi miền Tổ quốc.
+                    </p>
+
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                        <a href="#tin-tuc" class="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white text-un-deep font-extrabold text-sm sm:text-base shadow-xl hover:bg-sky-50 transition transform hover:-translate-y-0.5">
+                            Khám phá hoạt động <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#dang-ky-thanh-vien" class="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/30 text-white font-extrabold text-sm sm:text-base backdrop-blur-md transition">
+                            <i data-lucide="user-plus" class="w-5 h-5 text-emerald-300"></i> Đăng ký tình nguyện viên
+                        </a>
+                    </div>
+
+                    <!-- Admin Quick Action Bar in Hero -->
+                    <div id="hero-admin-cta" class="hidden pt-4 flex flex-wrap gap-3 justify-center lg:justify-start">
+                        <button onclick="openPostModal()" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-lg transition cursor-pointer">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Đăng tin bài mới
+                        </button>
+                        <button onclick="openDocModal()" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-lg transition cursor-pointer">
+                            <i data-lucide="file-up" class="w-4 h-4"></i> Đăng tải văn bản mới
+                        </button>
+                        <button onclick="triggerLogoUpload()" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm shadow-lg transition cursor-pointer">
+                            <i data-lucide="image" class="w-4 h-4"></i> Tải lên Logo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5">
+                    <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white/20 shadow-2xl relative">
+                        <div id="cloud-status-badge" class="absolute -top-4 -right-4 bg-emerald-500 text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                            <span id="cloud-status-text">Đồng bộ Cloud 24/7</span>
+                        </div>
+
+                        <h3 class="font-display text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-sky-300"></i> Thông tin tổ chức
+                        </h3>
+
+                        <div class="space-y-3.5 text-sm text-sky-100">
+                            <div class="flex items-start gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <i data-lucide="map-pin" class="w-5 h-5 text-sky-300 shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="text-xs text-sky-300 font-semibold uppercase">Trụ sở chính</p>
+                                    <p class="font-bold text-white">Thành phố Hồ Chí Minh, Việt Nam</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <i data-lucide="mail" class="w-5 h-5 text-sky-300 shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="text-xs text-sky-300 font-semibold uppercase">Email liên hệ</p>
+                                    <p class="font-bold text-white break-all">congdongtinhnguyenxahoivietnam@gmail.com</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <i data-lucide="facebook" class="w-5 h-5 text-sky-300 shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="text-xs text-sky-300 font-semibold uppercase">Fanpage chính thức</p>
+                                    <a href="https://www.facebook.com/CongdongTinhnguyenXahoiVietNam/" target="_blank" rel="noopener noreferrer" class="font-bold text-white underline hover:text-sky-200">
+                                        Cộng đồng Tình nguyện Xã hội Việt Nam
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-5 border-t border-white/15 flex items-center justify-between text-xs text-sky-200">
+                            <span>Tổng số bài viết hoạt động:</span>
+                            <span id="hero-post-count" class="font-mono font-extrabold text-white text-base">5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         3. VỀ CHÚNG TÔI & ĐỊNH HƯỚNG 17 SDGS
+    ====================================================================== -->
+    <section id="ve-chung-toi" class="py-16 md:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="px-3.5 py-1 rounded-full bg-un-light text-un-blue font-bold text-xs uppercase tracking-wider">
+                    Sứ mệnh nhân văn
+                </span>
+                <h2 class="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 mt-3">
+                    Kết Nối Yêu Thương – Kiến Tạo Tương Lai Bền Vững
+                </h2>
+                <p class="text-slate-600 text-sm sm:text-base mt-4 leading-relaxed">
+                    <strong>Cộng đồng Tình nguyện Xã hội Việt Nam</strong> hoạt động với tôn chỉ quy tụ sức mạnh đoàn kết của cộng đồng, triển khai các dự án thiết thực bám sát 17 Mục tiêu Phát triển Bền vững (SDGs) của Liên Hợp Quốc tại Việt Nam.
+                </p>
+            </div>
+
+            <!-- 17 SDGs Grid -->
+            <div id="muc-tieu-sdgs" class="pt-4">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                    <div>
+                        <span class="text-un-blue font-bold text-xs uppercase tracking-wider">Khung phát triển toàn cầu</span>
+                        <h3 class="font-display text-xl sm:text-2xl font-extrabold text-slate-900 mt-1">
+                            17 Mục tiêu Phát triển Bền vững (SDGs) tại Việt Nam
+                        </h3>
+                    </div>
+                    <p class="text-xs text-slate-500 max-w-sm">
+                        Nhấp vào bất kỳ mục tiêu nào bên dưới để lọc nhanh các bài viết và chiến dịch tương ứng trên hệ thống.
+                    </p>
+                </div>
+
+                <div id="sdg-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         4. ĐĂNG KÝ TÌNH NGUYÊN VIÊN & THÀNH VIÊN (CHUYỂN HƯỚNG GOOGLE FORM)
+    ====================================================================== -->
+    <section id="dang-ky-thanh-vien" class="py-16 md:py-24 bg-slate-100 border-t border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-r from-un-deep to-un-blue rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute right-0 top-0 translate-x-12 -translate-y-12 w-80 h-80 rounded-full bg-white/10 pointer-events-none"></div>
+                
+                <div class="grid lg:grid-cols-12 gap-8 items-center relative z-10">
+                    <div class="lg:col-span-8 space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/25 text-white text-xs font-bold uppercase tracking-wider">
+                            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Tuyển dụng tình nguyện viên chính thức
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-4xl font-extrabold leading-tight">
+                            Tham Gia Mạng Lưới Tình Nguyện Viên VSVC
+                        </h2>
+                        <p class="text-sky-100 text-sm sm:text-base leading-relaxed max-w-2xl">
+                            Để tạo thuận lợi tối đa và đảm bảo bảo mật thông tin cá nhân, toàn bộ việc đăng ký tham gia tình nguyện viên, ban sự kiện và cộng tác viên đều được thực hiện qua biểu mẫu chuẩn của tổ chức.
+                        </p>
+                        <div class="flex flex-wrap items-center gap-6 pt-2 text-xs sm:text-sm text-sky-100">
+                            <span class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-300"></i> Không cần đăng nhập web</span>
+                            <span class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-300"></i> Cấp chứng nhận tình nguyện</span>
+                            <span class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-300"></i> Linh hoạt thời gian</span>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-4 flex flex-col items-center lg:items-end justify-center">
+                        <a href="https://forms.gle/cYGqx6JPRFdbNyKF9" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-white text-un-deep font-display font-extrabold text-base shadow-xl hover:bg-sky-50 transition transform hover:-translate-y-1">
+                            <i data-lucide="external-link" class="w-5 h-5 text-un-blue"></i>
+                            Điền Form Đăng Ký Ngay
+                        </a>
+                        <p class="text-[11px] text-sky-200 mt-2 text-center lg:text-right">Mở liên kết trực tiếp tới Google Form chính thức</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         5. THÔNG TIN & TRUYỀN THÔNG
+    ====================================================================== -->
+    <section id="tin-tuc" class="py-16 md:py-24 bg-white border-t border-slate-200/70">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+                <div>
+                    <span class="text-un-blue font-bold text-sm uppercase tracking-wider">Bản tin cộng đồng</span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
+                        Thông tin & Truyền thông
+                    </h2>
+                    <p class="text-slate-600 text-sm sm:text-base mt-1">
+                        Cập nhật các chiến dịch cộng đồng, dự án SDGs thực tế tại Việt Nam.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Admin Post & Sync Buttons (Hidden unless logged in) -->
+                    <div id="admin-post-btn-wrapper" class="hidden flex flex-wrap items-center gap-2.5">
+                        <button onclick="syncDefaultsToCloud()" title="Đồng bộ dữ liệu mẫu lên đám mây Firebase" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition cursor-pointer">
+                            <i data-lucide="cloud-upload" class="w-3.5 h-3.5 text-un-blue"></i>
+                            Đồng bộ dữ liệu mẫu
+                        </button>
+                        <button onclick="openPostModal()" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white bg-un-blue hover:bg-un-dark shadow-md shadow-un-blue/25 transition cursor-pointer">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            Đăng tin bài mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter & Search Bar -->
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 mb-8 flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <div class="relative min-w-[230px] flex-1 sm:flex-initial">
+                        <select id="filter-sdg" onchange="applyFilters()" class="w-full appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl px-4 py-2.5 pr-9 focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                            <option value="all">🌐 Tất cả 17 Mục tiêu SDGs</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none"></i>
+                    </div>
+
+                    <div class="relative min-w-[190px] flex-1 sm:flex-initial">
+                        <select id="filter-category" onchange="applyFilters()" class="w-full appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl px-4 py-2.5 pr-9 focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                            <option value="all">📂 Tất cả danh mục</option>
+                            <option value="Tin hoạt động">Tin hoạt động</option>
+                            <option value="Chiến dịch gây quỹ">Chiến dịch gây quỹ</option>
+                            <option value="Gương mặt tình nguyện">Gương mặt tình nguyện</option>
+                            <option value="Báo cáo minh bạch">Báo cáo minh bạch</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none"></i>
+                    </div>
+
+                    <button id="clear-filter-btn" onclick="clearFilters()" class="hidden items-center gap-1 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 transition cursor-pointer">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i> Xóa lọc
+                    </button>
+                </div>
+
+                <div class="relative w-full lg:w-80">
+                    <input type="text" id="search-input" oninput="applyFilters()" placeholder="Tìm kiếm bài viết, địa điểm..." class="w-full bg-white border border-slate-200 text-slate-700 text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                </div>
+            </div>
+
+            <div id="active-filter-banner" class="hidden mb-6 p-3.5 rounded-xl bg-un-tint border border-sky-200 flex items-center justify-between text-sm">
+                <div class="flex items-center gap-2 text-un-deep font-medium" id="active-filter-text"></div>
+                <button onclick="clearFilters()" class="text-xs font-bold text-un-blue hover:underline cursor-pointer">Xem tất cả bài viết</button>
+            </div>
+
+            <!-- Articles Grid -->
+            <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                <!-- Rendered via JS -->
+            </div>
+
+            <div id="empty-state" class="hidden text-center py-16 px-4 bg-slate-50 rounded-3xl border border-dashed border-slate-300">
+                <div class="w-16 h-16 rounded-2xl bg-un-light text-un-blue flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="file-search" class="w-8 h-8"></i>
+                </div>
+                <h3 class="font-display text-lg font-bold text-slate-900">Chưa tìm thấy tin bài phù hợp</h3>
+                <p class="text-slate-500 text-sm max-w-md mx-auto mt-1 mb-5">
+                    Hiện chưa có bài viết nào khớp với bộ lọc bạn chọn. Bạn có thể xóa bộ lọc để xem toàn bộ bài viết.
+                </p>
+                <div class="flex justify-center gap-3">
+                    <button onclick="clearFilters()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-un-blue hover:bg-un-dark transition cursor-pointer">
+                        Xem tất cả bài viết
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         6. VĂN BẢN & TÀI LIỆU
+    ====================================================================== -->
+    <section id="van-ban-to-chuc" class="py-16 md:py-24 bg-slate-50 border-t border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+                <div>
+                    <span class="text-un-blue font-bold text-sm uppercase tracking-wider">Hệ thống hành chính</span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
+                        Văn bản & Tài liệu
+                    </h2>
+                    <p class="text-slate-600 text-sm sm:text-base mt-1">
+                        Tra cứu thông báo, kế hoạch, chương trình, báo cáo, công văn, quyết định, danh sách và văn bản khác.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Admin Document Upload Button (Hidden unless logged in) -->
+                    <div id="admin-doc-btn-wrapper" class="hidden">
+                        <button onclick="openDocModal()" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-md transition cursor-pointer">
+                            <i data-lucide="file-up" class="w-4 h-4"></i>
+                            Đăng tải văn bản mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Category Filters (Includes Danh sách & Văn bản khác) -->
+            <div class="flex flex-wrap items-center gap-2 mb-6" id="doc-category-filters">
+                <button onclick="filterDocuments('all')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-un-blue text-white transition shadow-sm cursor-pointer" data-category="all">
+                    📁 Tất cả văn bản
+                </button>
+                <button onclick="filterDocuments('Thông báo')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-category="Thông báo">
+                    📢 Thông báo
+                </button>
+                <button onclick="filterDocuments('Kế hoạch')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-category="Kế hoạch">
+                    📅 Kế hoạch
+                </button>
+                <button onclick="filterDocuments('Chương trình')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-category="Chương trình">
+                    🎯 Chương trình
+                </button>
+                <button onclick="filterDocuments('Báo cáo')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-category="Báo cáo">
+                    📊 Báo cáo
+                </button>
+                <button onclick="filterDocuments('Công văn')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-category="Công văn">
+                    ✉️ Công văn
+                </button>
+                <button onclick="filterDocuments('Quyết định')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-category="Quyết định">
+                    📜 Quyết định
+                </button>
+                <button onclick="filterDocuments('Danh sách')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-category="Danh sách">
+                    📋 Danh sách
+                </button>
+                <button onclick="filterDocuments('Văn bản khác')" class="doc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-category="Văn bản khác">
+                    🗂️ Văn bản khác
+                </button>
+            </div>
+
+            <!-- Documents Table -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100/70 border-b border-slate-200 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                <th class="py-4 px-6">Số / Ký hiệu & Tiêu đề văn bản</th>
+                                <th class="py-4 px-4">Hạng mục</th>
+                                <th class="py-4 px-4">Ngày ban hành</th>
+                                <th class="py-4 px-4">Cơ quan ban hành</th>
+                                <th class="py-4 px-6 text-right">Tải về / Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documents-table-body" class="divide-y divide-slate-100 text-sm">
+                            <!-- Rendered via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         6.5. BẢN ĐỒ MƯU SINH (GÁNH MƯU SINH)
+    ====================================================================== -->
+    <section id="ban-do-muu-sinh" class="py-16 md:py-24 bg-white border-t border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-br from-un-tint via-white to-sky-50 rounded-3xl p-8 sm:p-12 border border-sky-200/80 shadow-sm relative overflow-hidden">
+                <div class="absolute -right-12 -bottom-12 w-72 h-72 rounded-full bg-un-blue/5 pointer-events-none"></div>
+
+                <div class="grid lg:grid-cols-12 gap-8 items-center relative z-10">
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-un-light text-un-blue text-xs font-bold uppercase tracking-wider">
+                            <i data-lucide="map-pinned" class="w-4 h-4"></i> Dự án Cộng đồng & An sinh Xã hội
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
+                            Bản Đồ Mưu Sinh – Gánh Mưu Sinh
+                        </h2>
+                        <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                            Nền tảng bản đồ số kết nối và lan tỏa thông tin về các hoàn cảnh lao động tự do, gánh hàng rong và người bán vé số mưu sinh trên đường phố, giúp cộng đồng dễ dàng tìm thấy, sẻ chia và tiếp sức kịp thời.
+                        </p>
+                        <div class="flex flex-wrap items-center gap-4 pt-2 text-xs sm:text-sm text-slate-700 font-medium">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                                <i data-lucide="navigation" class="w-4 h-4 text-un-blue"></i> Tra cứu vị trí trực quan
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                                <i data-lucide="hand-heart" class="w-4 h-4 text-rose-500"></i> Chung tay hỗ trợ trực tiếp
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-5">
+                        <div class="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-md space-y-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-2xl bg-un-blue text-white flex items-center justify-center shrink-0 shadow-md shadow-un-blue/25">
+                                    <i data-lucide="map" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold text-un-blue uppercase tracking-wider">Cổng thông tin trực tuyến</p>
+                                    <h3 class="font-display font-extrabold text-slate-900 text-lg">ganhmuusinh.vn</h3>
+                                </div>
+                            </div>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                                Truy cập bản đồ tương tác để xem câu chuyện, địa điểm mưu sinh và đồng hành cùng những mảnh đời nghị lực.
+                            </p>
+                            <div class="pt-1 flex flex-col sm:flex-row gap-2.5">
+                                <a href="https://ganhmuusinh.vn/" target="_blank" rel="noopener noreferrer" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-un-blue hover:bg-un-dark text-white font-bold text-sm shadow-md shadow-un-blue/20 transition transform hover:-translate-y-0.5">
+                                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                                    Mở Bản đồ mưu sinh
+                                </a>
+                                <button onclick="copyText('https://ganhmuusinh.vn/', 'Đã sao chép liên kết Bản đồ mưu sinh!')" class="inline-flex items-center justify-center gap-1.5 px-4 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition cursor-pointer">
+                                    <i data-lucide="copy" class="w-4 h-4"></i> Sao chép
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         7. ĐÓNG GÓP & LIÊN HỆ
+    ====================================================================== -->
+    <section id="lien-he-dong-gop" class="py-16 md:py-24 bg-slate-100 border-t border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-12 gap-8 items-stretch">
+                <!-- Donation Card -->
+                <div class="lg:col-span-7 bg-gradient-to-br from-un-blue via-un-dark to-un-deep rounded-3xl p-8 sm:p-10 text-white shadow-xl relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none">
+                        <svg class="w-64 h-64" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </div>
+
+                    <div class="space-y-4 relative z-10">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold tracking-wide uppercase">
+                            <i data-lucide="badge-check" class="w-4 h-4 text-emerald-300"></i>
+                            Cổng Đóng Góp Minh Bạch 24/7
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-extrabold leading-tight">
+                            Đóng góp - Thiện Nguyện App
+                        </h2>
+                        <p class="text-sky-100 text-sm sm:text-base leading-relaxed">
+                            Mọi khoản đóng góp cho <strong>Cộng đồng Tình nguyện Xã hội Việt Nam</strong> đều được tiếp nhận và tự động sao kê công khai theo thời gian thực thông qua nền tảng <strong>Thiện Nguyện App</strong>.
+                        </p>
+
+                        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 sm:p-5 mt-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs text-sky-200 uppercase font-semibold">Tài khoản Thiện Nguyện chính thức</p>
+                                    <p class="font-mono text-sm sm:text-base font-bold text-white mt-0.5 break-all">
+                                        thiennguyen.app/user/congdongtinhnguyenxahoivietnam
+                                    </p>
+                                </div>
+                                <button onclick="copyText('https://thiennguyen.app/user/congdongtinhnguyenxahoivietnam', 'Đã sao chép liên kết tài khoản Thiện Nguyện!')" class="shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-xs font-semibold transition cursor-pointer">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Sao chép link
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-8 relative z-10 flex flex-wrap items-center gap-4">
+                        <a href="https://thiennguyen.app/user/congdongtinhnguyenxahoivietnam" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl bg-white text-un-deep font-extrabold text-sm sm:text-base shadow-lg hover:bg-sky-50 transition transform hover:-translate-y-0.5">
+                            <i data-lucide="external-link" class="w-5 h-5 text-un-blue"></i>
+                            Đóng góp & Xem sao kê tại Thiện Nguyện App
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Contact Card -->
+                <div class="lg:col-span-5 bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span class="text-un-blue font-bold text-xs uppercase tracking-wider">Kết nối & Hợp tác</span>
+                        <h3 class="font-display text-2xl font-extrabold text-slate-900 mt-1">
+                            Thông tin liên hệ
+                        </h3>
+                        <p class="text-slate-500 text-sm mt-2">
+                            Liên hệ với chúng tôi để đăng ký tham gia tình nguyện, đề xuất dự án SDGs hoặc hợp tác tài trợ.
+                        </p>
+
+                        <div class="space-y-4 mt-6">
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                                <div class="w-10 h-10 rounded-xl bg-un-light text-un-blue flex items-center justify-center shrink-0">
+                                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-400 uppercase">Trụ sở chính thức</p>
+                                    <p class="text-sm font-bold text-slate-800 mt-0.5">Thành phố Hồ Chí Minh, Việt Nam</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                                <div class="w-10 h-10 rounded-xl bg-un-light text-un-blue flex items-center justify-center shrink-0">
+                                    <i data-lucide="mail" class="w-5 h-5"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold text-slate-400 uppercase">Email chính thức</p>
+                                    <a href="mailto:congdongtinhnguyenxahoivietnam@gmail.com" class="text-sm font-bold text-un-blue hover:underline mt-0.5 block break-all">
+                                        congdongtinhnguyenxahoivietnam@gmail.com
+                                    </a>
+                                </div>
+                                <button onclick="copyText('congdongtinhnguyenxahoivietnam@gmail.com', 'Đã sao chép địa chỉ Email!')" title="Sao chép Email" class="p-2 text-slate-400 hover:text-un-blue rounded-lg hover:bg-white transition cursor-pointer">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                                <div class="w-10 h-10 rounded-xl bg-un-light text-un-blue flex items-center justify-center shrink-0">
+                                    <i data-lucide="facebook" class="w-5 h-5"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold text-slate-400 uppercase">Fanpage Facebook</p>
+                                    <a href="https://www.facebook.com/CongdongTinhnguyenXahoiVietNam/" target="_blank" rel="noopener noreferrer" class="text-sm font-bold text-slate-800 hover:text-un-blue transition mt-0.5 flex items-center gap-1">
+                                        Cộng đồng Tình nguyện Xã hội Việt Nam
+                                        <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 shrink-0"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-5 border-t border-slate-100">
+                        <a href="https://www.facebook.com/CongdongTinhnguyenXahoiVietNam/" target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-900 hover:bg-un-blue text-white text-sm font-semibold transition">
+                            <i data-lucide="message-circle" class="w-4 h-4"></i>
+                            Nhắn tin qua Fanpage Facebook
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         8. FOOTER
+    ====================================================================== -->
+    <footer class="bg-slate-900 text-slate-300 pt-14 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-12 gap-10 pb-10 border-b border-slate-800">
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div id="footer-logo-box" class="w-10 h-10 rounded-xl bg-un-blue flex items-center justify-center text-white overflow-hidden shrink-0">
+                            <i data-lucide="globe" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <span class="block font-display font-bold text-white text-sm uppercase">
+                                CỘNG ĐỒNG TÌNH NGUYỆN XÃ HỘI VIỆT NAM
+                            </span>
+                            <span class="block text-xs text-un-blue font-semibold">
+                                Vietnam Social Volunteer Community (VSVC)
+                            </span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        Kết nối nguồn lực tình nguyện, lan tỏa giá trị nhân văn và thúc đẩy thực hiện 17 Mục tiêu Phát triển Bền vững của Liên Hợp Quốc (SDGs) tại Việt Nam.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-3 pt-1">
+                        <a href="https://www.facebook.com/CongdongTinhnguyenXahoiVietNam/" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-un-blue text-white flex items-center justify-center transition" aria-label="Facebook">
+                            <i data-lucide="facebook" class="w-4 h-4"></i>
+                        </a>
+                        <a href="mailto:congdongtinhnguyenxahoivietnam@gmail.com" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-un-blue text-white flex items-center justify-center transition" aria-label="Email">
+                            <i data-lucide="mail" class="w-4 h-4"></i>
+                        </a>
+                        <a href="https://thiennguyen.app/user/congdongtinhnguyenxahoivietnam" target="_blank" rel="noopener noreferrer" class="px-3 h-9 rounded-lg bg-slate-800 hover:bg-un-blue text-white text-xs font-semibold flex items-center gap-1.5 transition">
+                            <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-400"></i> Thiện Nguyện App
+                        </a>
+                        <button onclick="openLoginModal()" class="px-3 h-9 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                            <i data-lucide="shield" class="w-3.5 h-3.5 text-sky-400"></i> Quản trị Admin
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-3 space-y-3">
+                    <h4 class="font-display font-bold text-white text-sm uppercase tracking-wider">Liên kết nhanh</h4>
+                    <ul class="space-y-2.5 text-sm text-slate-400">
+                        <li><a href="#trang-chu" class="hover:text-un-blue transition">Trang chủ</a></li>
+                        <li><a href="#ve-chung-toi" class="hover:text-un-blue transition">Về chúng tôi</a></li>
+                        <li><a href="#dang-ky-thanh-vien" class="hover:text-un-blue transition">Đăng ký tình nguyện viên</a></li>
+                        <li><a href="#muc-tieu-sdgs" class="hover:text-un-blue transition">17 Mục tiêu SDGs</a></li>
+                        <li><a href="#tin-tuc" class="hover:text-un-blue transition">Thông tin & Truyền thông</a></li>
+                        <li><a href="#van-ban-to-chuc" class="hover:text-un-blue transition">Văn bản & Tài liệu</a></li>
+                        <li><a href="#ban-do-muu-sinh" class="hover:text-un-blue transition">Bản đồ mưu sinh</a></li>
+                        <li><a href="#lien-he-dong-gop" class="hover:text-un-blue transition">Đóng góp - Thiện Nguyện App</a></li>
+                    </ul>
+                </div>
+
+                <div class="lg:col-span-4 space-y-3">
+                    <h4 class="font-display font-bold text-white text-sm uppercase tracking-wider">Thông tin liên hệ</h4>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-un-blue shrink-0 mt-1"></i>
+                            <span>Thành phố Hồ Chí Minh, Việt Nam</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="mail" class="w-4 h-4 text-un-blue shrink-0 mt-1"></i>
+                            <a href="mailto:congdongtinhnguyenxahoivietnam@gmail.com" class="hover:text-white break-all">
+                                congdongtinhnguyenxahoivietnam@gmail.com
+                            </a>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0 mt-1"></i>
+                            <a href="https://thiennguyen.app/user/congdongtinhnguyenxahoivietnam" target="_blank" rel="noopener noreferrer" class="hover:text-white">
+                                Tài khoản Thiện Nguyện: @congdongtinhnguyenxahoivietnam
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+                <p>© 2026 CỘNG ĐỒNG TÌNH NGUYỆN XÃ HỘI VIỆT NAM. Bảo lưu mọi quyền.</p>
+                <p>Định hướng phát triển bền vững theo 17 Mục tiêu Liên Hợp Quốc (UN SDGs) • Vận hành chính thức.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- =====================================================================
+         MODAL 1: ĐĂNG NHẬP QUẢN TRỊ VIÊN (ADMIN LOGIN)
+    ====================================================================== -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm p-4 flex items-center justify-center">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 relative">
+            <button onclick="closeLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="w-14 h-14 rounded-2xl bg-un-light text-un-blue flex items-center justify-center mb-4 shadow-sm">
+                <i data-lucide="shield-check" class="w-7 h-7"></i>
+            </div>
+            <h3 class="font-display text-xl font-extrabold text-slate-900">Đăng Nhập Quản Trị Viên</h3>
+            <p class="text-sm text-slate-500 mt-1 leading-relaxed">
+                Đăng nhập bằng tài khoản quản trị đã được cấp quyền trong hệ thống Firebase của tổ chức.
+            </p>
+            <form id="login-form" onsubmit="handleAdminLogin(event)" class="mt-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Email quản trị <span class="text-rose-500">*</span></label>
+                    <input type="email" id="admin-email" autocomplete="username" required placeholder="admin@example.com" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Mật khẩu <span class="text-rose-500">*</span></label>
+                    <input type="password" id="admin-password" autocomplete="current-password" required placeholder="Nhập mật khẩu tài khoản..." class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                </div>
+                <div class="pt-2 flex justify-end gap-3">
+                    <button type="button" onclick="closeLoginModal()" class="px-5 py-3 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer">
+                        Hủy bỏ
+                    </button>
+                    <button type="submit" class="px-6 py-3 rounded-xl text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 transition cursor-pointer shadow-md">
+                        Xác thực đăng nhập
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 2: ĐĂNG / CHỈNH SỬA TIN BÀI (CMS)
+    ====================================================================== -->
+    <div id="post-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6">
+        <div class="min-h-full flex items-center justify-center">
+            <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden">
+                <div class="bg-un-blue px-6 py-4 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <i data-lucide="pen-square" class="w-5 h-5"></i>
+                        <h3 id="modal-form-title" class="font-display font-bold text-lg">Đăng Tin Bài Hoạt Động Mới</h3>
+                    </div>
+                    <button onclick="closePostModal()" class="p-1.5 rounded-lg hover:bg-white/20 transition cursor-pointer">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <form id="article-form" onsubmit="saveArticle(event)" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
+                    <input type="hidden" id="edit-article-id" value="">
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tiêu đề bài viết <span class="text-rose-500">*</span></label>
+                        <input type="text" id="post-title" required placeholder="Ví dụ: Chiến dịch trồng 1.000 cây xanh ngập mặn tại Cần Giờ..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Mục tiêu SDG trọng tâm <span class="text-rose-500">*</span></label>
+                            <select id="post-sdg" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                                <!-- Populated via JS -->
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Danh mục tin bài <span class="text-rose-500">*</span></label>
+                            <select id="post-category" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                                <option value="Tin hoạt động">Tin hoạt động</option>
+                                <option value="Chiến dịch gây quỹ">Chiến dịch gây quỹ</option>
+                                <option value="Gương mặt tình nguyện">Gương mặt tình nguyện</option>
+                                <option value="Báo cáo minh bạch">Báo cáo minh bạch</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tác giả / Nhóm thực hiện <span class="text-rose-500">*</span></label>
+                            <input type="text" id="post-author" required value="Ban Truyền thông VSVC" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Địa điểm triển khai</label>
+                            <input type="text" id="post-location" value="Thành phố Hồ Chí Minh" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                        </div>
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Liên kết ảnh bìa (URL)</label>
+                            <input type="url" id="post-image" placeholder="https://..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Link bài viết đính kèm (không bắt buộc)</label>
+                            <input type="url" id="post-link" placeholder="https://facebook.com/... hoặc link báo chí" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tóm tắt ngắn gọn <span class="text-rose-500">*</span></label>
+                        <textarea id="post-summary" rows="2" required placeholder="Mô tả ngắn gọn nội dung chính của bài viết..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Nội dung chi tiết bài viết <span class="text-rose-500">*</span></label>
+                        <textarea id="post-content" rows="5" required placeholder="Nhập nội dung đầy đủ của bài viết..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20"></textarea>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+                        <button type="button" onclick="closePostModal()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer">
+                            Hủy bỏ
+                        </button>
+                        <button type="submit" id="save-article-submit-btn" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-un-blue hover:bg-un-dark shadow-md shadow-un-blue/20 transition cursor-pointer">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            <span id="submit-btn-text">Xuất bản bài viết</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 3: ĐĂNG TẢI VĂN BẢN & TÀI LIỆU (DOCUMENT CMS)
+    ====================================================================== -->
+    <div id="doc-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6">
+        <div class="min-h-full flex items-center justify-center">
+            <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-100 overflow-hidden">
+                <div class="bg-amber-600 px-6 py-4 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <i data-lucide="file-up" class="w-5 h-5"></i>
+                        <h3 class="font-display font-bold text-lg">Đăng Tải Văn Bản & Tài Liệu Mới</h3>
+                    </div>
+                    <button onclick="closeDocModal()" class="p-1.5 rounded-lg hover:bg-white/20 transition cursor-pointer">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <form id="doc-form" onsubmit="saveDocument(event)" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Số / Ký hiệu văn bản <span class="text-rose-500">*</span></label>
+                        <input type="text" id="doc-code" required placeholder="Ví dụ: 01/TB-VSVC" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tiêu đề văn bản <span class="text-rose-500">*</span></label>
+                        <input type="text" id="doc-title" required placeholder="Ví dụ: Thông báo về việc triển khai chiến dịch tình nguyện..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20">
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Hạng mục văn bản <span class="text-rose-500">*</span></label>
+                            <select id="doc-category" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20">
+                                <option value="Thông báo">📢 Thông báo</option>
+                                <option value="Kế hoạch">📅 Kế hoạch</option>
+                                <option value="Chương trình">🎯 Chương trình</option>
+                                <option value="Báo cáo">📊 Báo cáo</option>
+                                <option value="Công văn">✉️ Công văn</option>
+                                <option value="Quyết định">📜 Quyết định</option>
+                                <option value="Danh sách">📋 Danh sách</option>
+                                <option value="Văn bản khác">🗂️ Văn bản khác</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Cơ quan ban hành</label>
+                            <input type="text" id="doc-issuer" value="Ban Điều phối VSVC" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Đường dẫn tệp đính kèm (Google Drive / PDF / Link tải) <span class="text-rose-500">*</span></label>
+                        <input type="url" id="doc-file-url" required placeholder="https://..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20">
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+                        <button type="button" onclick="closeDocModal()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer">
+                            Hủy bỏ
+                        </button>
+                        <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-md transition cursor-pointer">
+                            <i data-lucide="upload" class="w-4 h-4"></i>
+                            Xuất bản văn bản
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 4: XEM CHI TIẾT BÀI VIẾT
+    ====================================================================== -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/70 backdrop-blur-sm p-4 sm:p-6">
+        <div class="min-h-full flex items-center justify-center">
+            <div class="bg-white rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden">
+                <div class="relative h-64 sm:h-80 bg-slate-200">
+                    <img id="detail-image" src="" alt="" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
+                    <button onclick="closeDetailModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-sm transition cursor-pointer">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                    <div class="absolute bottom-5 left-6 right-6 text-white">
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                            <span id="detail-sdg-badge" class="px-3 py-1 rounded-lg text-xs font-bold text-white shadow-sm"></span>
+                            <span id="detail-category" class="px-3 py-1 rounded-lg text-xs font-semibold bg-white/20 backdrop-blur-md"></span>
+                        </div>
+                        <h2 id="detail-title" class="font-display text-xl sm:text-2xl font-extrabold leading-snug"></h2>
+                    </div>
+                </div>
+
+                <div class="p-6 sm:p-8 max-h-[60vh] overflow-y-auto">
+                    <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 pb-4 mb-5 border-b border-slate-100">
+                        <div class="flex flex-wrap items-center gap-4">
+                            <span class="flex items-center gap-1.5 font-medium text-slate-700">
+                                <i data-lucide="user-check" class="w-4 h-4 text-un-blue"></i>
+                                <span id="detail-author"></span>
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-4 h-4 text-un-blue"></i>
+                                <span id="detail-date"></span>
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-un-blue"></i>
+                                <span id="detail-location"></span>
+                            </span>
+                        </div>
+
+                        <!-- Admin Quick Edit inside Detail Modal -->
+                        <div id="detail-admin-actions" class="hidden flex items-center gap-2">
+                            <button id="detail-edit-btn" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition cursor-pointer">
+                                <i data-lucide="pencil" class="w-3.5 h-3.5"></i> Sửa bài
+                            </button>
+                        </div>
+                    </div>
+
+                    <p id="detail-summary" class="text-base font-semibold text-slate-800 bg-un-tint border-l-4 border-un-blue p-4 rounded-r-xl mb-5 leading-relaxed"></p>
+                    <div id="detail-content" class="text-slate-600 text-sm sm:text-base leading-relaxed space-y-4 whitespace-pre-line"></div>
+
+                    <!-- Optional Attached External Link Box -->
+                    <div id="detail-link-wrapper" class="hidden mt-6 p-4 rounded-2xl bg-sky-50 border border-sky-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 text-un-deep">
+                            <i data-lucide="link" class="w-5 h-5 text-un-blue shrink-0"></i>
+                            <div>
+                                <p class="text-xs font-bold uppercase text-un-blue">Liên kết bài viết đính kèm</p>
+                                <p id="detail-link-url-text" class="text-xs text-slate-600 truncate max-w-xs sm:max-w-md"></p>
+                            </div>
+                        </div>
+                        <a id="detail-link-anchor" href="#" target="_blank" rel="noopener noreferrer" class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-un-deep hover:bg-un-blue text-white text-xs font-bold transition">
+                            Xem liên kết <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                        </a>
+                    </div>
+
+                    <div class="mt-6 p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-bold text-un-blue uppercase">Đồng hành cùng chiến dịch</p>
+                            <p class="text-sm font-semibold text-slate-800 mt-0.5">Đóng góp minh bạch qua tài khoản Thiện Nguyện App</p>
+                        </div>
+                        <a href="https://thiennguyen.app/user/congdongtinhnguyenxahoivietnam" target="_blank" rel="noopener noreferrer" class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-un-blue hover:bg-un-dark text-white text-xs font-bold transition">
+                            Ủng hộ ngay <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 5: XÁC NHẬN XÓA BÀI VIẾT / VĂN BẢN
+    ====================================================================== -->
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm p-4 flex items-center justify-center">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+                <i data-lucide="trash-2" class="w-6 h-6"></i>
+            </div>
+            <h3 id="delete-modal-title" class="font-display text-lg font-bold text-slate-900">Xác nhận xóa bài viết?</h3>
+            <p id="delete-modal-desc" class="text-sm text-slate-500 mt-1.5">
