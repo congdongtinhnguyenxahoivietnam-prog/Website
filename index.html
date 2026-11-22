@@ -808,6 +808,12 @@
                         </div>
                     </div>
 
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Ngày đăng tin/bài <span class="text-rose-500">*</span></label>
+                        <input type="date" id="post-date" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                        <p class="text-xs text-slate-500 mt-1">Có thể chọn ngày trong quá khứ hoặc tương lai.</p>
+                    </div>
+
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Liên kết ảnh bìa (URL)</label>
@@ -853,7 +859,7 @@
                 <div class="bg-amber-600 px-6 py-4 text-white flex items-center justify-between">
                     <div class="flex items-center gap-2.5">
                         <i data-lucide="file-up" class="w-5 h-5"></i>
-                        <h3 class="font-display font-bold text-lg">Đăng Tải Văn Bản & Tài Liệu Mới</h3>
+                        <h3 id="doc-modal-title" class="font-display font-bold text-lg">Đăng Tải Văn Bản & Tài Liệu Mới</h3>
                     </div>
                     <button onclick="closeDocModal()" class="p-1.5 rounded-lg hover:bg-white/20 transition cursor-pointer">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -861,6 +867,7 @@
                 </div>
 
                 <form id="doc-form" onsubmit="saveDocument(event)" class="p-6 space-y-4">
+                    <input type="hidden" id="edit-doc-id" value="">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Số / Ký hiệu văn bản <span class="text-rose-500">*</span></label>
                         <input type="text" id="doc-code" required placeholder="Ví dụ: 01/TB-VSVC" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20">
@@ -893,6 +900,12 @@
                     </div>
 
                     <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Ngày ban hành <span class="text-rose-500">*</span></label>
+                        <input type="date" id="doc-date" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20">
+                        <p class="text-xs text-slate-500 mt-1">Có thể chọn ngày ban hành trong quá khứ hoặc tương lai.</p>
+                    </div>
+
+                    <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Đường dẫn tệp đính kèm (Google Drive / PDF / Link tải) <span class="text-rose-500">*</span></label>
                         <input type="url" id="doc-file-url" required placeholder="https://..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20">
                     </div>
@@ -901,9 +914,9 @@
                         <button type="button" onclick="closeDocModal()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer">
                             Hủy bỏ
                         </button>
-                        <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-md transition cursor-pointer">
+                        <button type="submit" id="doc-submit-btn" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-md transition cursor-pointer">
                             <i data-lucide="upload" class="w-4 h-4"></i>
-                            Xuất bản văn bản
+                            <span id="doc-submit-text">Xuất bản văn bản</span>
                         </button>
                     </div>
                 </form>
@@ -1817,6 +1830,7 @@
 
             emptyState.classList.add("hidden");
 
+            list = list.slice().sort((a, b) => getRecordDateISO(b).localeCompare(getRecordDateISO(a)) || (b.createdAt || 0) - (a.createdAt || 0));
             grid.innerHTML = list.map(article => {
                 const sdg = UN_SDGs.find(s => s.id === Number(article.sdgId)) || UN_SDGs[16];
                 const fallbackImg = `https://placehold.co/800x500/009EDB/FFFFFF?text=SDG+${sdg.id}+VSVC`;
@@ -1909,6 +1923,7 @@
             if (!isEdit) {
                 form.reset();
                 document.getElementById("edit-article-id").value = "";
+                document.getElementById("post-date").value = getTodayISODate();
                 document.getElementById("post-author").value = "Ban Truyền thông VSVC";
                 document.getElementById("post-location").value = "Thành phố Hồ Chí Minh";
                 document.getElementById("post-link").value = "";
@@ -1946,8 +1961,8 @@
             }
 
             const existingArticle = editId ? articlesCache.find(a => a.id === editId) : null;
-            const today = new Date();
-            const formattedDate = existingArticle ? existingArticle.date : `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+            const dateISO = document.getElementById("post-date").value || getTodayISODate();
+            const formattedDate = formatISODateForDisplay(dateISO);
             const articleId = editId ? editId : "vsvc-" + Date.now();
 
             const articleData = {
@@ -1958,6 +1973,7 @@
                 author,
                 location,
                 date: formattedDate,
+                dateISO,
                 image,
                 externalLink,
                 summary,
@@ -2007,6 +2023,7 @@
             document.getElementById("post-category").value = article.category;
             document.getElementById("post-author").value = article.author;
             document.getElementById("post-location").value = article.location || "";
+            document.getElementById("post-date").value = getRecordDateISO(article);
             document.getElementById("post-image").value = article.image || "";
             document.getElementById("post-link").value = article.externalLink || "";
             document.getElementById("post-summary").value = article.summary;
@@ -2084,7 +2101,11 @@
         window.openDocModal = function() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             document.getElementById("doc-form").reset();
+            document.getElementById("edit-doc-id").value = "";
+            document.getElementById("doc-date").value = getTodayISODate();
             document.getElementById("doc-issuer").value = "Ban Điều phối VSVC";
+            document.getElementById("doc-modal-title").textContent = "Đăng Tải Văn Bản & Tài Liệu Mới";
+            document.getElementById("doc-submit-text").textContent = "Xuất bản văn bản";
             document.getElementById("doc-modal").classList.remove("hidden");
             document.body.style.overflow = "hidden";
             lucide.createIcons();
@@ -2099,15 +2120,16 @@
             event.preventDefault();
             if (!isAdminLoggedIn) return;
 
+            const editId = document.getElementById("edit-doc-id").value;
             const code = document.getElementById("doc-code").value.trim();
             const title = document.getElementById("doc-title").value.trim();
             const category = document.getElementById("doc-category").value;
             const issuer = document.getElementById("doc-issuer").value.trim() || "Ban Điều phối VSVC";
             const fileUrl = document.getElementById("doc-file-url").value.trim();
-
-            const today = new Date();
-            const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-            const docId = "doc-" + Date.now();
+            const dateISO = document.getElementById("doc-date").value || getTodayISODate();
+            const formattedDate = formatISODateForDisplay(dateISO);
+            const existingDoc = editId ? documentsCache.find(d => d.id === editId) : null;
+            const docId = editId || ("doc-" + Date.now());
 
             const newDoc = {
                 id: docId,
@@ -2115,27 +2137,54 @@
                 title,
                 category,
                 date: formattedDate,
+                dateISO,
                 issuer,
                 fileUrl,
-                createdAt: Date.now()
+                createdAt: existingDoc ? (existingDoc.createdAt || Date.now()) : Date.now(),
+                updatedAt: Date.now()
             };
 
-            documentsCache.unshift(newDoc);
+            if (editId) {
+                const index = documentsCache.findIndex(d => d.id === editId);
+                if (index >= 0) documentsCache[index] = newDoc;
+                else documentsCache.unshift(newDoc);
+            } else {
+                documentsCache.unshift(newDoc);
+            }
             localStorage.setItem("vsvc_persistent_documents", JSON.stringify(documentsCache));
-            filterDocuments('all');
+            filterDocuments(currentDocCategoryFilter);
             closeDocModal();
 
             if (db) {
                 try {
                     await setDoc(doc(db, 'documents', docId), newDoc);
-                    showToast("Đã đăng tải văn bản lên Cloud thành công!", "success");
+                    showToast(editId ? "Đã cập nhật văn bản lên Cloud thành công!" : "Đã đăng tải văn bản lên Cloud thành công!", "success");
                 } catch (e) {
                     console.error("Doc cloud save error:", e);
                     showToast("Đã lưu văn bản trên máy!", "info");
                 }
             } else {
-                showToast("Đã đăng tải văn bản thành công!", "success");
+                showToast(editId ? "Đã cập nhật văn bản thành công!" : "Đã đăng tải văn bản thành công!", "success");
             }
+        };
+
+        window.editDocument = function(id) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            const item = documentsCache.find(d => d.id === id);
+            if (!item) return;
+
+            document.getElementById("edit-doc-id").value = item.id;
+            document.getElementById("doc-code").value = item.code || "";
+            document.getElementById("doc-title").value = item.title || "";
+            document.getElementById("doc-category").value = item.category || "Văn bản khác";
+            document.getElementById("doc-issuer").value = item.issuer || "";
+            document.getElementById("doc-file-url").value = item.fileUrl || "";
+            document.getElementById("doc-date").value = getRecordDateISO(item);
+            document.getElementById("doc-modal-title").textContent = "Chỉnh sửa văn bản";
+            document.getElementById("doc-submit-text").textContent = "Lưu thay đổi";
+            document.getElementById("doc-modal").classList.remove("hidden");
+            document.body.style.overflow = "hidden";
+            lucide.createIcons();
         };
 
         window.filterDocuments = function(category) {
@@ -2156,7 +2205,9 @@
             const tbody = document.getElementById("documents-table-body");
             if (!tbody) return;
 
-            const filtered = category === 'all' ? documentsCache : documentsCache.filter(d => d.category === category);
+            const filtered = (category === 'all' ? documentsCache : documentsCache.filter(d => d.category === category))
+                .slice()
+                .sort((a, b) => getRecordDateISO(b).localeCompare(getRecordDateISO(a)) || (b.createdAt || 0) - (a.createdAt || 0));
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `
@@ -2182,7 +2233,10 @@
                 };
                 const badgeStyle = categoryBadgeColors[docItem.category] || "bg-slate-50 text-slate-700 border-slate-200";
 
-                const deleteBtnHtml = isAdminLoggedIn ? `
+                const adminActionsHtml = isAdminLoggedIn ? `
+                    <button onclick="editDocument('${docItem.id}')" title="Chỉnh sửa văn bản" class="p-2 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50 transition cursor-pointer">
+                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                    </button>
                     <button onclick="promptDeleteArticle('${docItem.id}', 'document')" title="Xóa văn bản" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
@@ -2210,7 +2264,7 @@
                                 <a href="${escapeHtml(docItem.fileUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-un-blue hover:bg-un-dark transition shadow-xs">
                                     <i data-lucide="download" class="w-3.5 h-3.5"></i> Tải về / Xem
                                 </a>
-                                ${deleteBtnHtml}
+                                ${adminActionsHtml}
                             </div>
                         </td>
                     </tr>
@@ -2337,6 +2391,36 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3400);
         };
+
+        function getTodayISODate() {
+            const now = new Date();
+            const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+            return localDate.toISOString().slice(0, 10);
+        }
+
+        function parseLegacyDateToISO(value) {
+            if (!value) return "";
+            const textValue = String(value).trim();
+            if (/^\\d{4}-\\d{2}-\\d{2}$/.test(textValue)) return textValue;
+            const match = textValue.match(/^(\\d{1,2})[\\/-](\\d{1,2})[\\/-](\\d{4})$/);
+            if (!match) return "";
+            return `${match[3]}-${String(match[2]).padStart(2, "0")}-${String(match[1]).padStart(2, "0")}`;
+        }
+
+        function getRecordDateISO(record) {
+            if (!record) return "";
+            const savedDate = record.dateISO || parseLegacyDateToISO(record.date);
+            if (savedDate) return savedDate;
+            if (record.createdAt) return new Date(record.createdAt).toISOString().slice(0, 10);
+            return "";
+        }
+
+        function formatISODateForDisplay(value) {
+            const iso = parseLegacyDateToISO(value);
+            if (!iso) return value || "";
+            const [year, month, day] = iso.split("-");
+            return `${day}/${month}/${year}`;
+        }
 
         function escapeHtml(str) {
             if (!str) return "";
