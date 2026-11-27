@@ -816,8 +816,14 @@
 
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Liên kết ảnh bìa (URL)</label>
-                            <input type="url" id="post-image" placeholder="https://..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tải ảnh bìa lên từ thiết bị</label>
+                            <input type="file" id="post-image-file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handlePostImageChange(event)" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                            <input type="hidden" id="post-image-current" value="">
+                            <p class="text-xs text-slate-500 mt-1">Chọn ảnh JPG, PNG, WEBP hoặc GIF; dung lượng tối đa 5 MB.</p>
+                            <div id="post-image-preview-wrapper" class="hidden mt-3">
+                                <img id="post-image-preview" alt="Ảnh bìa xem trước" class="w-full max-h-40 object-cover rounded-xl border border-slate-200">
+                                <p id="post-image-preview-label" class="text-xs text-slate-500 mt-1">Ảnh bìa hiện tại</p>
+                            </div>
                         </div>
 
                         <div>
@@ -1031,6 +1037,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // Cấu hình Firebase chính thức của dự án vsvc-vietnam
         const firebaseConfig = {
@@ -1046,6 +1053,7 @@
         let app = null;
         let db = null;
         let auth = null;
+        let storage = null;
         let isCloudConnected = false;
         let isAdminLoggedIn = false;
 
@@ -1285,6 +1293,7 @@
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
+                storage = getStorage(app);
 
                 // Quyền quản trị được xác minh từ Firebase Authentication + tài liệu admins/{uid}.
                 // Người xem công khai dùng phiên ẩn danh; không lưu trạng thái Admin trong trình duyệt.
@@ -1923,6 +1932,7 @@
             if (!isEdit) {
                 form.reset();
                 document.getElementById("edit-article-id").value = "";
+                setPostImagePreview("");
                 document.getElementById("post-date").value = getTodayISODate();
                 document.getElementById("post-author").value = "Ban Truyền thông VSVC";
                 document.getElementById("post-location").value = "Thành phố Hồ Chí Minh";
@@ -1941,6 +1951,38 @@
             document.body.style.overflow = "";
         };
 
+        function setPostImagePreview(url, label = "Ảnh bìa hiện tại") {
+            const wrapper = document.getElementById("post-image-preview-wrapper");
+            const imageEl = document.getElementById("post-image-preview");
+            const labelEl = document.getElementById("post-image-preview-label");
+            if (!wrapper || !imageEl) return;
+            if (url) {
+                imageEl.src = url;
+                wrapper.classList.remove("hidden");
+                if (labelEl) labelEl.textContent = label;
+            } else {
+                imageEl.removeAttribute("src");
+                wrapper.classList.add("hidden");
+            }
+        }
+
+        window.handlePostImageChange = function(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+            if (!allowedTypes.includes(file.type)) {
+                event.target.value = "";
+                showToast("Vui lòng chọn tệp ảnh JPG, PNG, WEBP hoặc GIF.", "error");
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                event.target.value = "";
+                showToast("Ảnh tải lên không được vượt quá 5 MB.", "error");
+                return;
+            }
+            setPostImagePreview(URL.createObjectURL(file), "Ảnh mới đã chọn");
+        };
+
         window.saveArticle = async function(event) {
             event.preventDefault();
             if (!isAdminLoggedIn) return;
@@ -1951,19 +1993,42 @@
             const category = document.getElementById("post-category").value;
             const author = document.getElementById("post-author").value.trim();
             const location = document.getElementById("post-location").value.trim() || "Thành phố Hồ Chí Minh";
-            let image = document.getElementById("post-image").value.trim();
+            let image = document.getElementById("post-image-current").value.trim();
+            const selectedImageFile = document.getElementById("post-image-file").files[0] || null;
             const externalLink = document.getElementById("post-link").value.trim();
             const summary = document.getElementById("post-summary").value.trim();
             const content = document.getElementById("post-content").value.trim();
-
-            if (!image) {
-                image = "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=900&q=80";
-            }
 
             const existingArticle = editId ? articlesCache.find(a => a.id === editId) : null;
             const dateISO = document.getElementById("post-date").value || getTodayISODate();
             const formattedDate = formatISODateForDisplay(dateISO);
             const articleId = editId ? editId : "vsvc-" + Date.now();
+
+            if (selectedImageFile) {
+                if (!storage) {
+                    showToast("Firebase Storage chưa sẵn sàng. Vui lòng thử lại sau.", "error");
+                    return;
+                }
+                if (selectedImageFile.size > 5 * 1024 * 1024) {
+                    showToast("Ảnh tải lên không được vượt quá 5 MB.", "error");
+                    return;
+                }
+                const safeFileName = selectedImageFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+                const imageObjectRef = storageRef(storage, `articles/${articleId}/${Date.now()}_${safeFileName}`);
+                try {
+                    showToast("Đang tải ảnh bìa lên...", "info");
+                    await uploadBytes(imageObjectRef, selectedImageFile, { contentType: selectedImageFile.type });
+                    image = await getDownloadURL(imageObjectRef);
+                } catch (uploadError) {
+                    console.error("Article image upload error:", uploadError);
+                    showToast("Không tải được ảnh lên. Vui lòng kiểm tra quyền Firebase Storage và thử lại.", "error");
+                    return;
+                }
+            }
+
+            if (!image) {
+                image = "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=900&q=80";
+            }
 
             const articleData = {
                 id: articleId,
@@ -2024,7 +2089,9 @@
             document.getElementById("post-author").value = article.author;
             document.getElementById("post-location").value = article.location || "";
             document.getElementById("post-date").value = getRecordDateISO(article);
-            document.getElementById("post-image").value = article.image || "";
+            document.getElementById("post-image-current").value = article.image || "";
+            document.getElementById("post-image-file").value = "";
+            setPostImagePreview(article.image || "");
             document.getElementById("post-link").value = article.externalLink || "";
             document.getElementById("post-summary").value = article.summary;
             document.getElementById("post-content").value = article.content;
