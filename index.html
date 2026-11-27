@@ -816,8 +816,13 @@
 
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Liên kết ảnh bìa (URL)</label>
-                            <input type="url" id="post-image" placeholder="https://..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:border-un-blue focus:ring-2 focus:ring-un-blue/20">
+                            <label for="post-image-file" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tải ảnh bìa lên</label>
+                            <input type="file" id="post-image-file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="previewArticleImage(event)" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-un-light file:px-3 file:py-2 file:text-xs file:font-bold file:text-un-blue">
+                            <p class="text-xs text-slate-500 mt-1.5">Chọn ảnh từ máy tính hoặc điện thoại (JPG, PNG, WEBP, GIF; tối đa 5 MB).</p>
+                            <div id="post-image-preview-wrap" class="hidden mt-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
+                                <img id="post-image-preview" alt="Xem trước ảnh bìa" class="max-h-44 w-full rounded-lg object-contain">
+                                <p id="post-image-preview-caption" class="mt-1.5 text-xs text-slate-500"></p>
+                            </div>
                         </div>
 
                         <div>
@@ -1031,6 +1036,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // Cấu hình Firebase chính thức của dự án vsvc-vietnam
         const firebaseConfig = {
@@ -1046,6 +1052,8 @@
         let app = null;
         let db = null;
         let auth = null;
+        let storage = null;
+        let articleImagePreviewUrl = "";
         let isCloudConnected = false;
         let isAdminLoggedIn = false;
 
@@ -1285,6 +1293,7 @@
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
+                storage = getStorage(app);
 
                 // Quyền quản trị được xác minh từ Firebase Authentication + tài liệu admins/{uid}.
                 // Người xem công khai dùng phiên ẩn danh; không lưu trạng thái Admin trong trình duyệt.
@@ -1927,6 +1936,8 @@
                 document.getElementById("post-author").value = "Ban Truyền thông VSVC";
                 document.getElementById("post-location").value = "Thành phố Hồ Chí Minh";
                 document.getElementById("post-link").value = "";
+                document.getElementById("post-image-file").value = "";
+                showCurrentArticleImagePreview("");
                 titleEl.textContent = "Đăng Tin Bài Hoạt Động Mới";
                 submitBtnText.textContent = "Xuất bản bài viết";
             }
@@ -1941,6 +1952,46 @@
             document.body.style.overflow = "";
         };
 
+        window.previewArticleImage = function(event) {
+            const file = event.target.files && event.target.files[0];
+            const wrap = document.getElementById("post-image-preview-wrap");
+            const preview = document.getElementById("post-image-preview");
+            const caption = document.getElementById("post-image-preview-caption");
+            if (!file) return;
+
+            if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+                event.target.value = "";
+                showToast("Vui lòng chọn ảnh JPG, PNG, WEBP hoặc GIF.", "error");
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                event.target.value = "";
+                showToast("Ảnh vượt quá 5 MB. Vui lòng chọn ảnh có dung lượng nhỏ hơn.", "error");
+                return;
+            }
+
+            if (articleImagePreviewUrl) URL.revokeObjectURL(articleImagePreviewUrl);
+            articleImagePreviewUrl = URL.createObjectURL(file);
+            preview.src = articleImagePreviewUrl;
+            caption.textContent = file.name + " • " + (file.size / 1024 / 1024).toFixed(2) + " MB";
+            wrap.classList.remove("hidden");
+        };
+
+        function showCurrentArticleImagePreview(imageUrl) {
+            const wrap = document.getElementById("post-image-preview-wrap");
+            const preview = document.getElementById("post-image-preview");
+            const caption = document.getElementById("post-image-preview-caption");
+            if (!imageUrl) {
+                wrap.classList.add("hidden");
+                preview.removeAttribute("src");
+                caption.textContent = "";
+                return;
+            }
+            preview.src = imageUrl;
+            caption.textContent = "Ảnh bìa hiện tại. Nếu không chọn ảnh mới, ảnh này sẽ được giữ nguyên.";
+            wrap.classList.remove("hidden");
+        }
+
         window.saveArticle = async function(event) {
             event.preventDefault();
             if (!isAdminLoggedIn) return;
@@ -1951,19 +2002,48 @@
             const category = document.getElementById("post-category").value;
             const author = document.getElementById("post-author").value.trim();
             const location = document.getElementById("post-location").value.trim() || "Thành phố Hồ Chí Minh";
-            let image = document.getElementById("post-image").value.trim();
+            const imageFile = document.getElementById("post-image-file").files[0] || null;
             const externalLink = document.getElementById("post-link").value.trim();
             const summary = document.getElementById("post-summary").value.trim();
             const content = document.getElementById("post-content").value.trim();
-
-            if (!image) {
-                image = "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=900&q=80";
-            }
-
             const existingArticle = editId ? articlesCache.find(a => a.id === editId) : null;
             const dateISO = document.getElementById("post-date").value || getTodayISODate();
             const formattedDate = formatISODateForDisplay(dateISO);
             const articleId = editId ? editId : "vsvc-" + Date.now();
+            let image = existingArticle?.image || "";
+
+            if (imageFile) {
+                if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(imageFile.type) || imageFile.size > 5 * 1024 * 1024) {
+                    showToast("Ảnh không hợp lệ hoặc vượt quá 5 MB. Vui lòng chọn lại.", "error");
+                    return;
+                }
+                if (!storage || !auth?.currentUser || auth.currentUser.isAnonymous) {
+                    showToast("Không thể tải ảnh lên lúc này. Vui lòng đăng nhập lại bằng tài khoản quản trị và thử lại.", "error");
+                    return;
+                }
+                const safeName = imageFile.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-80) || "cover-image";
+                const imagePath = "article-covers/" + articleId + "/" + Date.now() + "-" + safeName;
+                const imageRef = storageRef(storage, imagePath);
+                const submitButton = document.getElementById("save-article-submit-btn");
+                submitButton.disabled = true;
+                submitButton.classList.add("opacity-60", "cursor-not-allowed");
+                try {
+                    const uploaded = await uploadBytes(imageRef, imageFile, { contentType: imageFile.type });
+                    image = await getDownloadURL(uploaded.ref);
+                } catch (uploadError) {
+                    console.error("Article image upload error:", uploadError);
+                    showToast("Chưa tải được ảnh lên kho lưu trữ. Vui lòng thử lại hoặc liên hệ quản trị hệ thống.", "error");
+                    submitButton.disabled = false;
+                    submitButton.classList.remove("opacity-60", "cursor-not-allowed");
+                    return;
+                }
+                submitButton.disabled = false;
+                submitButton.classList.remove("opacity-60", "cursor-not-allowed");
+            }
+
+            if (!image) {
+                image = "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=900&q=80";
+            }
 
             const articleData = {
                 id: articleId,
@@ -1982,7 +2062,6 @@
                 updatedAt: Date.now()
             };
 
-            // Cập nhật ngay trên UI cục bộ
             if (editId) {
                 const idx = articlesCache.findIndex(a => a.id === editId);
                 if (idx !== -1) articlesCache[idx] = articleData;
@@ -1992,20 +2071,17 @@
             }
 
             localStorage.setItem("vsvc_persistent_articles", JSON.stringify(articlesCache));
-            
-            // Tự động reset bộ lọc để bài mới luôn hiển thị rõ ràng
             clearFilters();
             renderSDGGrid();
             closePostModal();
 
-            // Lưu lên Firebase Firestore để đồng bộ cho mọi thiết bị khác
             if (db) {
                 try {
-                    await setDoc(doc(db, 'articles', articleId), articleData);
+                    await setDoc(doc(db, "articles", articleId), articleData);
                     showToast(editId ? "Đã cập nhật bài viết lên Cloud!" : "Đã xuất bản bài viết lên Cloud!", "success");
                 } catch (e) {
                     console.error("Cloud save error:", e);
-                    showToast("Đã lưu bài trên máy (Vui lòng bật Firestore Rules để đồng bộ đa máy).", "info");
+                    showToast("Đã lưu bài trên máy nhưng chưa đồng bộ Cloud. Vui lòng kiểm tra kết nối và thử lưu lại.", "info");
                 }
             } else {
                 showToast(editId ? "Đã cập nhật bài viết!" : "Đã xuất bản bài viết!", "success");
@@ -2024,7 +2100,8 @@
             document.getElementById("post-author").value = article.author;
             document.getElementById("post-location").value = article.location || "";
             document.getElementById("post-date").value = getRecordDateISO(article);
-            document.getElementById("post-image").value = article.image || "";
+            document.getElementById("post-image-file").value = "";
+            showCurrentArticleImagePreview(article.image || "");
             document.getElementById("post-link").value = article.externalLink || "";
             document.getElementById("post-summary").value = article.summary;
             document.getElementById("post-content").value = article.content;
