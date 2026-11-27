@@ -1037,7 +1037,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // Cấu hình Firebase chính thức của dự án vsvc-vietnam
         const firebaseConfig = {
@@ -1053,7 +1052,6 @@
         let app = null;
         let db = null;
         let auth = null;
-        let storage = null;
         let isCloudConnected = false;
         let isAdminLoggedIn = false;
 
@@ -1293,7 +1291,6 @@
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                storage = getStorage(app);
 
                 // Quyền quản trị được xác minh từ Firebase Authentication + tài liệu admins/{uid}.
                 // Người xem công khai dùng phiên ẩn danh; không lưu trạng thái Admin trong trình duyệt.
@@ -2005,23 +2002,29 @@
             const articleId = editId ? editId : "vsvc-" + Date.now();
 
             if (selectedImageFile) {
-                if (!storage) {
-                    showToast("Firebase Storage chưa sẵn sàng. Vui lòng thử lại sau.", "error");
+                if (!auth || !auth.currentUser || auth.currentUser.isAnonymous) {
+                    showToast("Phiên đăng nhập quản trị không hợp lệ. Vui lòng đăng nhập lại.", "error");
                     return;
                 }
-                if (selectedImageFile.size > 5 * 1024 * 1024) {
-                    showToast("Ảnh tải lên không được vượt quá 5 MB.", "error");
-                    return;
-                }
-                const safeFileName = selectedImageFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-                const imageObjectRef = storageRef(storage, `articles/${articleId}/${Date.now()}_${safeFileName}`);
                 try {
                     showToast("Đang tải ảnh bìa lên...", "info");
-                    await uploadBytes(imageObjectRef, selectedImageFile, { contentType: selectedImageFile.type });
-                    image = await getDownloadURL(imageObjectRef);
+                    const idToken = await auth.currentUser.getIdToken(true);
+                    const uploadForm = new FormData();
+                    uploadForm.append("image", selectedImageFile);
+                    uploadForm.append("articleId", articleId);
+                    const uploadResponse = await fetch("/api/article-images/upload", {
+                        method: "POST",
+                        headers: { Authorization: `Bearer ${idToken}` },
+                        body: uploadForm
+                    });
+                    const uploadResult = await uploadResponse.json().catch(() => ({}));
+                    if (!uploadResponse.ok || !uploadResult.url) {
+                        throw new Error(uploadResult.error || "Không thể tải ảnh lên.");
+                    }
+                    image = uploadResult.url;
                 } catch (uploadError) {
                     console.error("Article image upload error:", uploadError);
-                    showToast("Không tải được ảnh lên. Vui lòng kiểm tra quyền Firebase Storage và thử lại.", "error");
+                    showToast(uploadError.message || "Không tải được ảnh lên. Vui lòng thử lại.", "error");
                     return;
                 }
             }
