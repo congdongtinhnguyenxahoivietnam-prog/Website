@@ -1,28 +1,46 @@
-# Cấu hình Cloudflare R2 cho ảnh bìa bài viết (PR #4)
+# Lưu trữ ảnh bài viết sau PR #5
 
-## Vì sao cần cấu hình
-Mã nguồn dùng Cloudflare Pages Functions để tải ảnh lên R2. Không dùng Firebase Storage nên không cần nâng cấp Firebase Blaze. Các bài viết và URL ảnh cũ trong Firestore được giữ nguyên.
+## Hệ thống tải ảnh mới
 
-## Thiết lập bắt buộc trước khi kiểm thử Preview
-1. Trong Cloudflare Dashboard, mở **Storage & databases → R2**.
-2. Tạo bucket riêng cho thử nghiệm, ví dụ `ctxhsvn-article-images-preview`.
-3. Mở **Workers & Pages → Pages → congdongtinhnguyenvietnam → Settings → Functions → R2 bucket bindings**.
-4. Ở phần **Preview** (không phải Production), thêm binding:
-   - Variable name: `ARTICLE_IMAGES`
-   - R2 bucket: `ctxhsvn-article-images-preview`
-5. Lưu cấu hình. Không gắn bucket Production vào Preview.
+Từ PR #5, ảnh bài viết mới được tải trực tiếp từ Cloudflare Pages Function lên Cloudinary bằng signed upload. Không còn sử dụng R2 cho thao tác tải ảnh mới.
 
-## Thiết lập Production (chỉ sau khi Preview đạt)
-Tạo bucket riêng `ctxhsvn-article-images`, sau đó thêm R2 binding tên `ARTICLE_IMAGES` ở phần **Production**. Không thực hiện bước này trước khi được duyệt phát hành.
+Các biến môi trường phải được cấu hình trong Cloudflare Pages:
 
-## Kiểm tra bảo mật
-- Endpoint upload chỉ nhận Firebase ID token của người dùng đã đăng nhập.
-- Pages Function kiểm tra tài liệu `admins/{uid}` trong Firestore: `role == "admin"` và `active == true`.
-- Chỉ chấp nhận JPG, PNG, WEBP, GIF; tối đa 5 MB.
-- Khóa truy cập R2 không nằm trong trình duyệt hoặc mã nguồn.
-- Ảnh được phân phối qua endpoint đọc công khai của website; chỉ endpoint tải lên được bảo vệ.
+- Preview:
+  - `CLOUDINARY_CLOUD_NAME=orgsdfcu`
+  - `CLOUDINARY_API_KEY` (Secret)
+  - `CLOUDINARY_API_SECRET` (Secret)
+- Production: chưa cấu hình hoặc thay đổi trong PR này. Chỉ thêm sau khi Preview được kiểm thử và có phê duyệt phát hành.
 
-## Kiểm thử Preview
-Sau khi cấu hình binding Preview, kiểm tra: người chưa đăng nhập bị từ chối; tài khoản không phải admin bị từ chối; ảnh hợp lệ dưới 5 MB tải lên thành công; tệp sai định dạng hoặc quá 5 MB bị từ chối; ảnh cũ và bài viết cũ vẫn hiển thị; chỉnh sửa bài không chọn ảnh mới vẫn giữ ảnh cũ.
+## Tương thích ảnh cũ
 
-**Lưu ý:** Preview không thể kiểm thử tải ảnh thực tế cho đến khi bucket Preview và binding `ARTICLE_IMAGES` được tạo trong Cloudflare Dashboard.
+Endpoint `/api/article-images/:key` vẫn được giữ lại để phục vụ các URL ảnh R2 cũ đã có thể được lưu trong Firestore. Endpoint này chỉ đọc, không còn nhận ảnh tải lên.
+
+Nếu dữ liệu hiện tại có URL dạng `/api/article-images/...`, cần giữ R2 bucket binding `ARTICLE_IMAGES` tương ứng để ảnh cũ tiếp tục hiển thị. Không xóa bucket hoặc binding cũ cho đến khi đã kiểm kê và xác nhận không còn bài viết nào phụ thuộc vào chúng.
+
+Nếu không còn ảnh R2 cũ, có thể gỡ binding R2 sau khi kiểm tra dữ liệu thực tế.
+
+## Bảo mật và giới hạn
+
+- Endpoint upload yêu cầu Firebase ID token hợp lệ và tài khoản có tài liệu `admins/{uid}` với `role == "admin"` và `active == true`.
+- API Secret chỉ được dùng phía Pages Function; tuyệt đối không đưa vào frontend, Git hoặc chat.
+- Signed upload được tạo phía máy chủ theo quy tắc chữ ký Cloudinary.
+- Chỉ chấp nhận JPG, PNG, WEBP, GIF; tối đa 5 MB; kiểm tra chữ ký byte cơ bản của định dạng ảnh.
+- URL trả về phải là HTTPS từ `res.cloudinary.com` và đúng Cloud Name đã cấu hình.
+- URL ảnh Cloudinary được lưu vào trường `image` hiện có trong Firestore. Không thay đổi cấu trúc dữ liệu bài viết.
+
+## Kiểm thử Preview bắt buộc
+
+1. Thiếu một trong ba biến Cloudinary phải trả về 503, không làm hỏng website.
+2. Người chưa đăng nhập và tài khoản không có quyền Admin phải bị từ chối.
+3. Ảnh JPG, PNG, WEBP, GIF hợp lệ dưới 5 MB tải lên thành công.
+4. Tệp sai MIME/header, tệp rỗng hoặc ảnh trên 5 MB phải bị từ chối.
+5. URL trả về phải là secure_url Cloudinary đúng Cloud Name.
+6. Lưu bài viết mới và kiểm tra trường `image` trong Firestore.
+7. Chỉnh sửa bài viết mà không chọn ảnh mới phải giữ URL ảnh hiện tại.
+8. Bài viết cũ dùng URL ảnh ngoài hoặc URL R2 phải tiếp tục hiển thị.
+9. Không thay đổi biến môi trường Production, R2 Production binding, hoặc dữ liệu Production trong quá trình kiểm thử.
+
+## Rollback
+
+Nếu Preview không đạt, đóng PR hoặc sửa trên nhánh tính năng. Không hợp nhất vào `main`; Production tiếp tục chạy phiên bản trước PR #5.

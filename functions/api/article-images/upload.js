@@ -13,7 +13,7 @@ function json(data, status = 200) {
   });
 }
 
-async function isActiveAdmin(request, env) {
+async function isActiveAdmin(request) {
   const authorization = request.headers.get("Authorization") || "";
   const match = authorization.match(/^Bearer\s+(.+)$/i);
   if (!match) return false;
@@ -39,9 +39,42 @@ async function isActiveAdmin(request, env) {
   }
 }
 
+function toHex(buffer) {
+  return Array.from(new Uint8Array(buffer), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function cloudinarySignature(publicId, timestamp, apiSecret) {
+  // Cloudinary requires signed parameters sorted alphabetically, followed directly by the API secret.
+  const stringToSign = `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
+  const digest = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(stringToSign));
+  return toHex(digest);
+}
+
+function hasValidImageHeader(bytes, extension) {
+  const isJpeg = extension === "jpg" && bytes.length >= 3
+    && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  const isPng = extension === "png" && bytes.length >= 8
+    && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47
+    && bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a;
+  const isGif = extension === "gif" && bytes.length >= 6
+    && String.fromCharCode(...bytes.slice(0, 3)) === "GIF"
+    && (String.fromCharCode(...bytes.slice(3, 6)) === "87a" || String.fromCharCode(...bytes.slice(3, 6)) === "89a");
+  const isWebp = extension === "webp" && bytes.length >= 12
+    && String.fromCharCode(...bytes.slice(0, 4)) === "RIFF"
+    && String.fromCharCode(...bytes.slice(8, 12)) === "WEBP";
+  return isJpeg || isPng || isGif || isWebp;
+}
+
 export async function onRequestPost({ request, env }) {
-  if (!env.ARTICLE_IMAGES) return json({ error: "Dịch vụ lưu ảnh chưa được cấu hình." }, 503);
-  if (!(await isActiveAdmin(request, env))) {
+  const cloudName = String(env.CLOUDINARY_CLOUD_NAME || "").trim();
+  const apiKey = String(env.CLOUDINARY_API_KEY || "").trim();
+  const apiSecret = String(env.CLOUDINARY_API_SECRET || "");
+
+  if (!/^[a-zA-Z0-9_-]{1,100}$/.test(cloudName) || !apiKey || !apiSecret) {
+    return json({ error: "Dịch vụ lưu ảnh Cloudinary chưa được cấu hình đầy đủ." }, 503);
+  }
+
+  if (!(await isActiveAdmin(request))) {
     return json({ error: "Bạn không có quyền tải ảnh lên. Vui lòng đăng nhập lại bằng tài khoản quản trị." }, 403);
   }
 
@@ -60,33 +93,62 @@ export async function onRequestPost({ request, env }) {
   if (!/^[a-zA-Z0-9_-]{1,100}$/.test(articleId)) {
     return json({ error: "Mã bài viết không hợp lệ." }, 400);
   }
+
   const extension = ALLOWED_TYPES.get(file.type);
   if (!extension) return json({ error: "Chỉ chấp nhận ảnh JPG, PNG, WEBP hoặc GIF." }, 415);
   if (file.size <= 0 || file.size > MAX_IMAGE_BYTES) {
     return json({ error: "Ảnh phải có dung lượng từ 1 byte đến tối đa 5 MB." }, 413);
   }
 
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  const isJpeg = extension === "jpg" && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
-  const isPng = extension === "png" && bytes.length >= 8
-    && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
-  const isGif = extension === "gif" && bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46;
-  const isWebp = extension === "webp" && bytes.length >= 12
-    && String.fromCharCode(...bytes.slice(0, 4)) === "RIFF"
-    && String.fromCharCode(...bytes.slice(8, 12)) === "WEBP";
-  if (!(isJpeg || isPng || isGif || isWebp)) {
+  let bytes;
+  try {
+    bytes = new Uint8Array(await file.arrayBuffer());
+  } catch {
+    return json({ error: "Không thể đọc tệp ảnh tải lên." }, 400);
+  }
+  if (!hasValidImageHeader(bytes, extension)) {
     return json({ error: "Nội dung tệp không đúng định dạng ảnh đã chọn." }, 415);
   }
 
-  const key = `articles-${articleId}-${Date.now()}-${crypto.randomUUID()}.${extension}`;
+  const timestamp = Math.floor(Date.now() / 1000);
+  const publicId = `ctxhsvn-articles/${articleId}-${Date.now()}-${crypto.randomUUID()}`;
+
   try {
-    await env.ARTICLE_IMAGES.put(key, bytes, {
-      httpMetadata: { contentType: file.type, cacheControl: "public, max-age=31536000, immutable" },
-      customMetadata: { articleId }
-    });
-    return json({ url: `/api/article-images/${encodeURIComponent(key)}` });
+    const signature = await cloudinarySignature(publicId, timestamp, apiSecret);
+    const cloudinaryForm = new FormData();
+    cloudinaryForm.append("file", new Blob([bytes], { type: file.type }), `article-image.${extension}`);
+    cloudinaryForm.append("api_key", apiKey);
+    cloudinaryForm.append("timestamp", String(timestamp));
+    cloudinaryForm.append("public_id", publicId);
+    cloudinaryForm.append("signature", signature);
+
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`,
+      { method: "POST", body: cloudinaryForm }
+    );
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      console.error("Cloudinary article image upload failed:", response.status, result.error?.message || "Provider error");
+      return json({ error: "Cloudinary không thể lưu ảnh. Vui lòng kiểm tra cấu hình dịch vụ và thử lại." }, 502);
+    }
+
+    const secureUrl = String(result.secure_url || "");
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(secureUrl);
+    } catch {
+      return json({ error: "Cloudinary trả về đường dẫn ảnh không hợp lệ." }, 502);
+    }
+    if (parsedUrl.protocol !== "https:"
+      || parsedUrl.hostname !== "res.cloudinary.com"
+      || !parsedUrl.pathname.startsWith(`/${cloudName}/image/upload/`)) {
+      return json({ error: "Cloudinary trả về đường dẫn ảnh không an toàn." }, 502);
+    }
+
+    return json({ url: secureUrl });
   } catch (error) {
-    console.error("R2 article image upload failed:", error);
-    return json({ error: "Không thể lưu ảnh vào kho lưu trữ. Vui lòng thử lại." }, 500);
+    console.error("Cloudinary article image upload error:", error?.message || "Unknown error");
+    return json({ error: "Không thể tải ảnh lên Cloudinary. Vui lòng thử lại." }, 502);
   }
 }
