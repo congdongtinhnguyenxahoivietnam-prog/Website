@@ -15,7 +15,7 @@ function json(data, status = 200) {
 
 async function isActiveAdmin(request) {
   const authorization = request.headers.get("Authorization") || "";
-  const match = authorization.match(/^Bearer\\s+(.+)$/i);
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
   if (!match) return false;
 
   try {
